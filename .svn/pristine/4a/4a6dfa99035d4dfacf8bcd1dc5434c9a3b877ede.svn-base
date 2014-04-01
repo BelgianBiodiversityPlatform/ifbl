@@ -1,7 +1,0 @@
-* Get the code:
-    svn co svn+ssh://dev/home/svn/repos/bbpf/trunk/ifblserver
-    
-* Install needed gems:
-    $ bundle install
-
-TODO: Check/complete this file
