@@ -1,0 +1,555 @@
+-@include_colorpicker = true
+
+.grid_3#statistics.sidebox.equal_height_columns
+  %h1#stats_title Statistics
+  %table
+    -@counters.each do |c|
+      %tr
+        %td= c.name.capitalize
+        %td{style: 'font-weight: bold;'}= number_with_delimiter c.value
+   
+.grid_9.equal_height_columns
+  %h1#intro_title Introduction
+  .blabla Ever since the year 1939 occurrences of vascular plants in Belgium and Luxemburg were registered in IFBL survey lists. The goal of this website is to compile and visualize Belgian this IFBL Flora checklists data in one portal. At this time, the IFBL data Portal brings together data from two digitization projects from the Belgian Biodiversity Portal:  IFBL1 and IFBL2 and the Florabank,  the database that deals with the distribution data of the wild flora (indigenous species, archeophytes and naturalised aliens) of Flanders and the Brussels Capital Region. 
+
+.clear
+
+.section
+  .grid_10.prefix_1#search_form_outer 
+    #search_form_container.inner_box
+      %h1#search_title Search by species
+      =form_tag do
+        %p{style: 'overflow: auto;'}
+          %p.explanation 1) Select a plant species: 
+          %select#species
+            -@species.each do |s|
+              <option data-sn="#{s.scientific_name}" value="#{s.id}">#{s.scientific_name}  &nbsp;&nbsp;-&nbsp;&nbsp;  #{pluralize  s.num_observations, 'observation'}</option>
+    
+        %p{style: 'margin-top: 15px;'}
+          %p.explanation 2) Add filtering (if necessary): 
+          %input{type:'checkbox', name:'filter_by_date', id:'filter_by_date'}
+          %label#l_datefilter.filter_button{for:'filter_by_date'}
+            Filter by date
+          #date_presets{style: 'display:none;'}
+            %p.subfield
+              %input{type: 'radio', name: 'datetype', value: 'before39', id: 'before39'}
+              %label{for: 'before39'}
+              Before 1939
+
+            %p.subfield
+              %input{type: 'radio', name: 'datetype', value: '39-71', id: '39-71'}
+              %label{for: '39-71'}
+              1939 - 1971
+      
+            %p.subfield
+              %input{type: 'radio', name: 'datetype', value: '72-04', id: '72-04'}
+              %label{for: '72-04'}
+              1972 - 2004
+
+            %p.subfield
+              %input{type: 'radio', name: 'datetype', value: 'after04', id: 'after04'}
+              %label{for: 'after04'}
+              After 2004
+
+            %p.subfield
+              %input{type: 'radio', name: 'datetype', value: 'free', id: 'free'}
+              %label{for: 'free'}
+              Manual dates:
+              After 
+              %input{type: 'text', id: 'start_date'}
+              and before 
+              %input{type: 'text', id: 'end_date'}
+
+          %p
+            %input{type:'checkbox', name:'filter_by_square', id:'filter_by_square'}
+            %label#l_squarefilter.filter_button{for: 'filter_by_square'}
+              Filter by geographic zone
+            %p.subfield
+              %span#square_name_container{style: 'display:none;'}
+                %input{type: 'text', id:'square_name'}
+                %span.example
+                  Examples: d6 (32x20 km zone), d6-54 (4x4 km zone) or d6-54-42 (1x1 km zone).
+          
+          %p.explanation 3) Search: 
+          %p#submit_link_cont
+            %a#submit_link
+              Add to map
+    #arrow-down
+  .clear
+  
+
+  
+  #map_container.grid_9
+    #search_map
+
+  #legend.grid_3.inner_box
+    %h1
+      Layers
+
+  #bg_selector.grid_9
+  .clear
+  
+
+:javascript
+  $(document).ready(function() {
+
+    $('#submit_link').button({'icons': {'secondary': 'ui-icon-search'} });
+    $('#filter_by_date').button({'icons': {'primary': 'ui-icon-power'} });
+    $('#filter_by_square').button({'icons': {'primary': 'ui-icon-power'} });
+    
+    $('#filter_by_date').click(function() {
+      $('#date_presets').toggle('blind');
+    });
+
+    $('#filter_by_square').click(function() {
+      $('#square_name_container').toggle('blind');
+    });
+    
+    IFBL.current_page.adaptMapToCheckBox = function(checkbox, map) {
+      var detailed_data_layers = [];
+      var generalized_data_layers = [];
+      
+      // Fill the two layers arrays
+      $.each(map.layers, function(i, layer) {
+        if(layer.plant_data === true) {
+          detailed_data_layers.push(layer)
+          generalized_data_layers.push(layer.generalized_layer)
+        }
+      });
+      
+      if ($(checkbox).is(':checked')) {
+        IFBL.current_page.checkbox_checked = true;
+        $.each(detailed_data_layers, function(i, detailed_layer) {
+          detailed_layer.addOptions({maxResolution: 100});
+          detailed_layer.redraw();
+          detailed_layer.setVisibility(false); detailed_layer.setVisibility(true); // Stupid trick to FORCE REFRESH, redraw is not enough
+        });
+        $.each(generalized_data_layers, function(i, general_layer) {
+          general_layer.setVisibility(true);
+        })
+        
+      }
+      else { // Box is unchecked
+        IFBL.current_page.checkbox_checked = false;
+        
+        $.each(detailed_data_layers, function(i, detailed_layer) {
+          detailed_layer.addOptions({maxResolution: null});
+          detailed_layer.redraw();
+          detailed_layer.setVisibility(true);
+        });
+        
+        $.each(generalized_data_layers, function(i, general_layer) {
+          general_layer.setVisibility(false);
+        })
+      }
+      
+      
+    };
+
+    IFBL.current_page.getLayerName = function(species_id) {
+      // return $('#species option[value='+ species_id + ']').text();
+      return $('#species option[value='+ species_id + ']').attr('data-sn');
+    };
+
+    
+    IFBL.current_page.getKmlUrlForLayer= function (layer) {
+      var newParams = {
+        FORMAT: 'application/vnd.google-earth.kml+xml',
+        WIDTH: '1024', /* dummy but mandatory? */ 
+        HEIGHT: '768', /* dummy but mandatory? */
+        BBOX: "41202.343945,6175178.923422,958446.683239,6908974.394858", /* Extent a little bigger than Belgium */
+      };
+  
+      return layer.getFullRequestString(newParams);
+    };
+
+    IFBL.current_page.insertLegendEntry = function(color, filters, for_layer, species_id) {
+      var entry = $('<div class="legend_entry"></div>');
+      var $printable_map_link;
+      
+      var changeColorCallback;
+
+      $(for_layer).data('legend_div', entry);
+
+      var $firstline = $('<div class="title">' + for_layer.name + '</div>');
+      $firstline.prepend($('<p data-color="' + color +'" class="color_box" style="background-color:#'+ color + ';"></p>'));
+
+      $firstline.append($('<a class="closebutton">Close</a>').button({icons: {primary: "ui-icon-closethick"}, text: false}).click(function() {
+        $(for_layer).data('legend_div').fadeOut();
+        for_layer.generalized_layer.destroy()
+        for_layer.destroy();
+        }));
+
+      entry.append($firstline);
+
+      // Show the title only if filters exists
+      if (!$.isEmptyObject(filters)) {
+        entry.append($('<b>Active filters:</b>'));
+      }
+
+      if ('date' in filters) {
+        if (filters['date'] == 'before39') {
+          entry.append($('<p class="filter">- Before 1939</p>'));
+        }
+        else if (filters['date'] == '39-71') {
+          entry.append($('<p class="filter">- 1939 - 1971</p>'));
+        }
+        else if (filters['date'] == '72-04') {
+          entry.append($('<p class="filter">- 1972 - 2004</p>'));
+        }
+        else if (filters['date'] == 'after04') {
+          entry.append($('<p class="filter">- After 2004</p>'));
+        }
+        else if (filters['date'] == 'free') {
+          if (filters['date_values']['start']) {
+            entry.append($('<p class="filter">- After ' + filters['date_values']['start'] + '</p>'));
+          }if (filters['date_values']['end']) {
+            entry.append($('<p class="filter">- Before ' + filters['date_values']['end'] + '</p>'));
+          }
+
+        }
+      }
+
+      if ('square' in filters) {
+        entry.append($('<p class="filter">- restricted to square' + filters['square']+'</p>'));
+      }    
+   
+      var dl_url = IFBL.current_page.getKmlUrlForLayer(for_layer);
+      var dl_link = $('<a href="' +dl_url + '">Export for Google Earth</a>');
+
+      var $button_line = $('<p class="buttons"></p>');
+      $button_line.append(IFBL.generateVisiButton(for_layer));
+      
+      var $button_line2 =$('<p class="buttons"></p>');  
+      $button_line2.append(dl_link.button());
+
+      var dialog = $('<div></div>')
+      
+
+      dialog.dialog({autoOpen: false, title: 'Results', width: 800, height: 600, zIndex: 99999999, buttons: { "Close": function() { $(this).dialog("close"); } }});
+
+      var $button_line3 = $('<p class="buttons"></p>');
+      var txt_link = $('<a>loading...</a>').button({ disabled: true }).click(function() {
+        dialog.dialog('open');
+        return false;
+      });
+
+      IFBL.getAndWriteTextResults(species_id, filters, dialog, txt_link);
+
+      $button_line3.append(txt_link);
+      
+      $printable_map_link = $('<a href="javascript: void(0)">Printable map</a>');
+      $printable_map_link.click(function(){
+        var url;
+        var layer_str, cql_str, styles_str, format_options_str, viewparams_str;
+        var eco;
+        var data_layer_wms;
+        var show_ecoregions = false;
+        
+        var layers_to_print = [
+          {
+            description: 'Countries',
+            cql_filter: 'INCLUDE',
+            layer: 'bbpf:TM_WORLD_BORDERS-0',
+            style: 'ifbl_print_background'
+          }];
+            
+          
+        // Add ecoregions (or not!!)
+        eco = IFBL.current_page.map.getLayersByName('Ecoregions')[0];
+        if(eco.visibility) {
+          show_ecoregions = true;
+          
+          layers_to_print.push({
+            description: 'Ecoregions',
+            cql_filter: 'INCLUDE',
+            layer:'bbpf:ecoregions',
+            style: 'ecoregions'
+          });
+        }
+        
+        // Choose between 1/4 squares
+        if ($('#generalize').is(':checked')) {
+          if (IFBL.current_page.map.getResolution() > for_layer.maxResolution) {
+            data_layer_wms = for_layer.generalized_layer.params.LAYERS;
+          }
+          else {
+            data_layer_wms = for_layer.params.LAYERS;
+          }
+          
+        } else {
+          data_layer_wms = for_layer.params.LAYERS;
+        }
+        
+        layers_to_print.push({
+                          description: 'Data',
+                          cql_filter: for_layer.params.CQL_FILTER,
+                          layer: data_layer_wms,
+                          style: 'ifbl_param_print',
+                          // we also have to copy viewparams (date filtering)
+                          viewparams: for_layer.params.VIEWPARAMS
+                        });
+                        
+        //console.log(for_layer);
+        
+        // Fixed params
+        url = IFBL.constants.wms_real_url 
+          + '?TRANSPARENT=TRUE'
+          + '&SERVICE=WMS'
+          + '&VERSION=1.1.1'
+          + '&REQUEST=GetMap'
+          + '&FORMAT=image/png'
+          + '&SRS=EPSG:900913'
+          + '&WIDTH=2048&HEIGHT=1536';
+         
+        // LAYERS 
+        layer_str = '&LAYERS=';
+        cql_str = '&CQL_FILTER=';
+        style_str = '&STYLES=';
+          
+        viewparams_str = '&VIEWPARAMS=';  
+          
+        $.each(layers_to_print, function(i, layer) {
+          var is_last_item = (i == (layers_to_print.length - 1));
+      
+          layer_str += layer.layer;
+          cql_str += encodeURIComponent(layer.cql_filter);
+          style_str += layer.style;
+          
+          if (layer.viewparams!=undefined) {
+            viewparams_str += layer.viewparams;
+          }
+          // TODO: add separator when multiple layers
+          if(!is_last_item) {
+            layer_str += ',';
+            cql_str += ';';
+            style_str += ','
+            // No separator for viewparams cause there's only one
+          }
+          
+        });  
+        
+        url += layer_str;
+        url += cql_str;
+        url += style_str;
+        url += viewparams_str;
+        
+        // BBOX
+        url += '&BBOX=' + IFBL.current_page.map.getExtent().toBBOX();
+        
+        // ENV (color)
+        url += '&ENV=' + for_layer.params.ENV;
+        
+        format_options_str =  '&FORMAT_OPTIONS=layout:';
+        
+        if (show_ecoregions) {
+          format_options_str += 'ifbl_print_w_ecoregions';
+        } else {
+          format_options_str += 'ifbl_print';
+        }
+        
+        url+= format_options_str;
+        
+        
+        console.log(url);
+        window.open(url, '_newtab');
+      });
+      
+      entry.append($button_line).append($button_line2).append($button_line3).append($printable_map_link);
+
+      $('#legend').append(entry);
+      
+      changeColorCallback = function(el, hex) {
+        // Change the color of the element
+        $(el).attr('data-color', hex);
+    		$(el).css('background-color', '#' + hex);
+    		
+    		// Hide the picker
+    		$(el).ColorPickerHide();
+    		
+    		// Reload the layer
+    		for_layer.mergeNewParams({env: "color:" + hex});
+    		for_layer.generalized_layer.mergeNewParams({env: "color:" + hex});
+    		
+      };
+      
+      $('.color_box').ColorPicker( {
+          onBeforeShow: function () {
+            // Sets current color
+      		  $(this).ColorPickerSetColor($(this).attr('data-color'));
+      	  },
+      	  
+      	  onSubmit: function(hsb, hex, rgb, el) { 
+      	    changeColorCallback(el, hex);
+          },
+          
+          
+          
+      	});
+      
+
+    };
+
+
+    IFBL.current_page.addSpecies = function (species_id, filters) {
+      var r;
+      var layer_name = IFBL.current_page.getLayerName(species_id);
+      var color_hex = IFBL.current_page.getColor();
+
+
+      // Add 4km transparent squares
+      var new_layer4 = IFBL.current_page.createLayerForSpecies(species_id, layer_name + '_4', color_hex, filters, 4);
+      map.addLayer(new_layer4);
+      // And real data (coloured)
+      var new_layer = IFBL.current_page.createLayerForSpecies(species_id, layer_name, color_hex, filters, 1);
+      map.addLayer(new_layer);
+    
+      // Store the "large squares layer" as an attribute of the "real data layer", so it can be accessed easily later (visibility button, ...)
+      new_layer.generalized_layer = new_layer4;
+      
+      // Allow easy retrieval of "data" layers
+      new_layer.plant_data = true; 
+    
+      IFBL.current_page.insertLegendEntry (color_hex, filters, new_layer, species_id);
+
+      IFBL.current_page.adaptMapToCheckBox($('#generalize'), IFBL.current_page.map); // So the newly added data respect the checkbox state
+    };
+
+    // Local functions
+    IFBL.current_page.createLayerForSpecies = function (species_id, layer_name, color, filters, square_type) {
+    var lay;
+
+    var layer_params = {
+        singleTile: true
+    };
+
+    if (square_type == 1) {
+      lay = IFBL.constants.mylayers.squares_per_species.name;
+      layer_params.maxResolution = IFBL.constants.switch_resolution;
+    }
+    else { // 4Km squares
+      lay = IFBL.constants.mylayers.large_squares_per_species.name;
+      layer_params.minResolution = IFBL.constants.switch_resolution;
+    }
+
+    var wms_params = {
+        CQL_FILTER: 'species_id='+species_id,
+        env: "color:"+color,
+        layers: lay,
+        transparent: true,
+      };
+
+    if ('square' in filters) {
+      wms_params.CQL_FILTER =  wms_params.CQL_FILTER + " AND ifbl_code LIKE '%" + filters['square'] + "%'"; 
+    }
+
+    // Alter the params according to filters
+    if ('date' in filters) {
+      if (filters['date'] == 'before39') {
+        wms_params.VIEWPARAMS = "range_end:1939-01-01";
+      }
+      else if (filters['date'] == '39-71') {
+        wms_params.VIEWPARAMS = "range_start:1939-01-01;range_end:1971-12-31";
+      }
+      else if (filters['date'] == '72-04') {
+        wms_params.VIEWPARAMS = "range_start:1972-01-01;range_end:2004-01-01";
+      }
+      else if (filters['date'] == 'after04') {
+        wms_params.VIEWPARAMS = "range_start:2004-01-01";
+      }
+      else if (filters['date'] == 'free') {
+        var s, e;
+
+        //console.log(filters['date_values']['start']);
+
+        if (filters['date_values']['start']) {
+          s = filters['date_values']['start'];
+        }
+        else {
+          s = "1000-01-01";
+        }
+        
+        if (filters['date_values']['end']) {
+          e = filters['date_values']['end'];
+        }
+        else {
+          e = "3000-01-01";
+        }
+        wms_params.VIEWPARAMS = "range_start:" + s + ";" + "range_end:" + e;
+
+      }
+
+    }
+
+ 
+    return layer = new OpenLayers.Layer.WMS( 
+      layer_name, 
+      IFBL.constants.wms_url, wms_params, layer_params);
+    },
+
+    IFBL.current_page.getColor = function() {
+      return (0x1000000+(Math.random())*0xffffff).toString(16).substr(1,6);
+    };
+
+
+    var map = IFBL.initMap('search_map');
+    IFBL.current_page.map = map;
+    $('#bg_selector').prepend(IFBL.getBgSelector(map));
+    $('#bg_selector').append(IFBL.getAddLayersButtons(map));
+    $('#bg_selector').append(IFBL.getGeneralizeButton());
+
+    $('#start_date').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, yearRange:'1900:+01' });
+    $('#end_date').datepicker({ dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, yearRange:'1900:+01' });
+
+
+    var params = IFBL.getUrlVars();
+  
+    if(params['species']) {
+      // Select it on the form for subsequent searches
+      $('#species').val(params['species']);
+
+      IFBL.current_page.addSpecies(params['species'], {});
+      $("#search_map").scrollintoview();
+    }
+
+
+    $('#submit_link').click(function() {
+
+      // Read filters from form
+      filters = {};
+      if ($('#filter_by_date').is(':checked')) {
+        var id_of_checked_radio = $("input[name=datetype]:checked").attr('id');
+
+        if (id_of_checked_radio == 'before39') {
+          filters['date'] = 'before39'; 
+        }
+        else if (id_of_checked_radio == '39-71') {
+          filters['date'] = '39-71'; 
+        }
+        else if (id_of_checked_radio == '72-04') {
+          filters['date'] = '72-04'; 
+        }
+        else if (id_of_checked_radio == 'after04') {
+          filters['date'] = 'after04'; 
+        }
+        else if (id_of_checked_radio == 'free') {
+          filters['date'] = 'free';
+          filters['date_values'] = {
+            start: $('#start_date').val(),
+            end: $('#end_date').val()
+          }; 
+        }
+      }
+
+      if ($('#filter_by_square').is(':checked')) {
+        filters['square'] = $('#square_name').val();
+      }
+
+      IFBL.current_page.addSpecies($('#species').val(), filters);
+      
+      $("#map_container").scrollintoview();  
+
+      return false; // prevent form submit
+    });
+
+  });

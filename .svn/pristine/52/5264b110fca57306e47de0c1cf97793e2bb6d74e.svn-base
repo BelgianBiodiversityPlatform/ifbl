@@ -1,0 +1,29 @@
+-@include_fancyzoom = true
+:javascript
+  $(document).ready(function() {
+    setupZoom();
+  });
+
+.grid_12
+  %h1#methodology_title The IFBL Methodology
+  .grid_8.alpha
+    %p.blabla
+      The IFBL methodology was first used for the Belgian atlas (VAN ROMPAEY & DELVOSALLE 1972). Later it was used in the making of the “Atlas van de Flora van Vlaanderen en het Brussels Gewest” (VAN LANDUYT et All 2006). Today, most of the recorders working on the inventory of plants, bryophytes or fungi in Belgium still use the IFBL methodology.  The only difference is the use of slightly adapted checklists.
+  
+    %p.blabla
+      The IFBL grid, which was created by Belgian and Luxemburg Institute for Floristics and based on maps of the National Belgian Institute for Geography, divides Belgium in 4 x 4 Km squares, which are further divided in 1 x 1 km squares. Every square has a particular code, where the first two characters give information about the selected map, the following numbers about the 4 x 4 Km specific square (“uurhok”) and the last two numbers about the 1 x 1 Km square (“kwartierhok”).  The IFBL grid is not the same as the UTM grid, mostly used for faunistics.  
+    
+    %p.blabla
+      When a recorder visits a square on the grid he or she must mark all the different species encountered in a certain 4 x 4 Km or 1 x 1 Km square on the IFBL checklist. Encountered species which are not on the list must be noted in the margin or elsewhere on the checklist. The goal is to investigate all the 4 x4 km squares and some of the 1 x 1 Km squares within the 4 x 4 Km square. The reason here for is that checking all the 1 X 1 Km squares would mean an almost undoable amount of work. At least two 1 x 1 Km squares in every 4 x 4 Km square should be visited multiple times during each season, this because of the differences in  flowering period.
+
+    %p.blabla
+      An example of such a checklist you can find here. On the checklist, the code of the square is also noted, together with the date and more information on the location, habitat…
+     
+    %p.blabla
+      The IFBL data collected on the field can feed in to several databases. This website tries to gather, combine and publish all the digitized IFBL data pertaining to Belgium.
+
+  .grid_4.omega#ifbl_illustrated  
+    %a{:href => image_path('IFBL_Belgie.jpg')}
+      =image_tag 'IFBL_Belgie-small.jpg'
+    %p
+      How the IFBL grid works   

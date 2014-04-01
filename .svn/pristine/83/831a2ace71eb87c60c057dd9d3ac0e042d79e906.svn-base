@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<StyledLayerDescriptor version="1.0.0" 
+xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" 
+xmlns="http://www.opengis.net/sld" 
+xmlns:ogc="http://www.opengis.net/ogc" 
+xmlns:xlink="http://www.w3.org/1999/xlink" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                
+<NamedLayer>
+<Name>EcoregiosBelgium</Name>
+<UserStyle>
+<Title>Style made by Qgis</Title>
+<Abstract>Style for layer EcoregiosBelgium</Abstract>
+<FeatureTypeStyle>
+              
+<Rule> 
+<Name>EcoregiosBelgium</Name>
+<Title>EcoregiosBelgium</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal></ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#d95ac3</CssParameter>
+    <CssParameter name="fill-opacity">1</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>Ardenne</Name>
+<Title>Ardenne</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>Ardenne</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#3f38f0</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>Condroz et sillo</Name>
+<Title>Condroz et sillo</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>Condroz et sillo</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#fb5966</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>Fagne-Famenne-Ca</Name>
+<Title>Fagne-Famenne-Ca</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>Fagne-Famenne-Ca</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#54c2cd</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>Gaume et Lorrain</Name>
+<Title>Gaume et Lorrain</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>Gaume et Lorrain</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#6b7b82</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>Thierache</Name>
+<Title>Thierache</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>Thierache</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#e02463</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>duin</Name>
+<Title>duin</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>duin</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#1ddcf1</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>kempen</Name>
+<Title>kempen</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>kempen</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#6aba3f</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>leem</Name>
+<Title>leem</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>leem</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#5f75f0</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>maas</Name>
+<Title>maas</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>maas</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#e56631</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>polder</Name>
+<Title>polder</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>polder</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#418495</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>
+<Rule> 
+<Name>zandleem</Name>
+<Title>zandleem</Title>
+<Abstract>EcoregiosBelgium</Abstract>
+<ogc:Filter>
+  <ogc:PropertyIsEqualTo>
+  <ogc:PropertyName>REGION</ogc:PropertyName>
+  <ogc:Literal>zandleem</ogc:Literal>
+  </ogc:PropertyIsEqualTo>
+</ogc:Filter>
+<PolygonSymbolizer>
+  <Fill>
+    <CssParameter name="fill">#9cb4d8</CssParameter>
+    <CssParameter name="fill-opacity">0.6</CssParameter>
+  </Fill>
+  <Stroke>
+  <CssParameter name="stroke">#000000</CssParameter>
+  <CssParameter name="stroke-width">0.26</CssParameter>
+  <CssParameter name="stroke-opacity">1</CssParameter>
+  </Stroke>
+</PolygonSymbolizer>
+</Rule>      
+</FeatureTypeStyle>
+</UserStyle>
+</NamedLayer>
+</StyledLayerDescriptor>

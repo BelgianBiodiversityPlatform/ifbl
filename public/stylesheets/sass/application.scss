@@ -1,0 +1,602 @@
+$green: #baf152;
+$orange: #f69625;
+
+$lightblue: #8aaccc;
+$my_yellow: #ffc700;
+
+$lightgray_on_gray: #555;
+$lightgray_on_black: #222;
+$almost_white: #aaa;
+
+$container_bg_color: #303030;
+$container_txt_color: #fff;
+
+$external_color: #fff;
+
+$light_blue: #c5d5e4;
+
+p.btt {
+    margin: 0 auto 15px auto;
+    display: table;
+    img, a {
+        display: table-cell;
+    }
+}
+
+#tools li {
+    margin-left: 40px;
+}
+
+#gene_help {
+    background-color: white;
+    padding: 3px;
+}
+
+/* Titles with icons */
+#title_tools {
+    background: url('../images/disk.png') no-repeat right center;
+}
+
+#title_resources {
+    background: url('../images/box-label.png') no-repeat right center;
+}
+
+#title_toc {
+    background: url('../images/script-text.png') no-repeat 10% center;
+}
+
+#title_contact_science {
+    background: url('../images/book.png') no-repeat left center;
+}
+
+#title_contact_web {
+    background: url('../images/keyboard.png') no-repeat left center;
+}
+
+#stats_title {
+    background: url('../images/counter.png') no-repeat 10% center;
+}
+
+#intro_title {
+    background: url('../images/balloon.png') no-repeat right center;
+}
+
+#search_title {
+    background: url('../images/magnifier-zoom.png') no-repeat 20px center;
+}
+
+#browse_title {
+    background: url('../images/map.png') no-repeat right center;
+}
+
+#results_title {
+    background: url('../images/table.png') no-repeat right center;
+}
+
+.checklist_title {
+    background: url('../images/blue-document-horizontal.png') no-repeat right center;
+}
+
+#methodology_title {
+    background: url('../images/blue-document-text-image.png') no-repeat right center;
+}
+
+#contact_title {
+    background: url('../images/mail.png') no-repeat right center;
+}
+
+#links_title {
+    background: url('../images/star.png') no-repeat right center;
+}
+
+#metadata {
+    background: url('../images/wooden-box-label.png') no-repeat right center;
+}
+/* END Title with icons */
+
+.tip {
+    background: url("../images/light-bulb.png") no-repeat 10px center;
+    padding: 10px 10px 10px 30px;
+    border: 1px solid #FCEFA1;
+    background-color: #FBF9EE;
+    color: black !important;
+    font-size: 14px !important;
+    margin: 20px 0;
+}
+
+#arrow-down {
+	width: 0;
+	height: 0;
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	border-top: 20px solid #f00;
+}
+
+#dialog-success h2 {
+    color: $lightgray_on_black;
+    font-size: 1.5em;
+    border-bottom: 0;
+}
+
+#tips_outer {
+    margin: 10px 0;
+}
+
+#validate_tips {
+    padding: 15px 5px;
+    margin: 10px 25px;
+}
+
+// Legend dialog (for overlays)
+.le_color {
+    width: 20px;
+}
+
+.le_title {
+    padding-left: 20px;
+}
+
+#ifbl_illustrated {
+    text-align: center;
+    font-style: italic;
+}
+
+.contact_block {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    
+    
+    h2 {
+        text-align: center;
+    }
+}
+
+.link_entry {
+    border: 1px solid $lightgray_on_gray;
+    border-left: 15px solid $light_blue;
+    margin-bottom: 15px;
+    padding: 15px;
+    overflow: auto;
+    
+    &:hover {
+        background-color: #000;
+        -webkit-transition: background-color .50s ease;
+        transition: background-color .50s ease;
+    }
+    
+    #rightcol {
+       margin-left: 180px;
+    }
+    
+    img {
+        width: 160px;
+        float: left;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+        border-bottom: 0;
+        margin-bottom: 0;
+        letter-spacing: 0;
+        word-spacing: 0;
+        text-shadow: none;
+    }
+}
+
+p.notered {
+    font-size: bigger;
+    color: red;
+    border: 2px solid red;
+    padding: 10px;
+}
+
+address {
+    margin-bottom: 40px;
+}
+
+.sidebox {
+    
+    background-color: #000;
+    border-radius: 3px;
+}
+
+.sidebox h1, #search_form_container h1{
+    font-size: 2em;
+    border: 0;
+    text-align: center;
+    color: $my_yellow;
+    border-bottom: 1px solid #997800;
+}
+
+#statistics {
+    table {
+        width: 80%;
+        margin: 0 auto;
+    }
+}
+
+#sidebar {
+    ul {
+        list-style-type: none;
+        padding-left: 15px;
+        &:first-child {
+            padding-left:5px;
+        };
+        
+    }
+}
+
+a {
+    color: $my_yellow;
+}
+
+.blabla {
+    margin-bottom: 24px;
+    color: $light_blue;
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: justify;
+    
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
+}
+
+.blabla + .blabla {
+    text-indent: 1.5em;
+
+}
+html {height: 100%;} /* needed for gradient */
+
+body {
+  font-size: smaller;
+  padding: 15px;
+
+  background-color: #8aaccc; // Fallback (IE < 10)
+  /* gradient */
+  background-image: linear-gradient(bottom, rgb(250,250,250) 11%, rgb(138,172,204) 100%);
+  background-image: -o-linear-gradient(bottom, rgb(250,250,250) 11%, rgb(138,172,204) 100%);
+  background-image: -moz-linear-gradient(bottom, rgb(250,250,250) 11%, rgb(138,172,204) 100%);
+  background-image: -webkit-linear-gradient(bottom, rgb(250,250,250) 11%, rgb(138,172,204) 100%);
+  background-image: -ms-linear-gradient(bottom, rgb(250,250,250) 11%, rgb(138,172,204) 100%);
+
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.11, rgb(250,250,250)),
+	color-stop(1, rgb(138,172,204))
+);
+
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+
+  }
+
+#container {
+  font-family: 'PT Sans', Helvetica, Arial, sans-serif; 
+  background-color: $container_bg_color;
+  color: $container_txt_color;
+  box-shadow: 0px 0px 12px #444;
+
+  a {
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    };
+  };
+}
+
+.section {
+  /*margin-left: 20px;*/
+}
+
+#main_menu {
+  float: right;  
+
+  .subtitles {
+      color: #888;
+      font-size: 0.75em;
+      position: relative;
+      bottom: 7px;
+  }
+  
+  li {
+    list-style-type: none;
+    float: left;
+    padding: 10px;
+    margin: 0 10px;
+    font-size: 1.1em;
+
+    a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      &:hover {text-decoration: underline}
+    }
+
+    &.selected  {
+      
+      a {
+	    
+        color: $my_yellow;
+      }
+
+    }
+  }
+}
+
+#banner_outer {
+  position: relative;
+  margin-bottom: 40px;
+  
+  img {
+    position: relative;
+    left: -17px;
+    width: 977px;
+    height: 140px;
+  }
+  
+  h1 {
+      position: absolute;
+      top: 20px;
+      color: white;
+      border-bottom: 0;
+      text-align: center;
+      width: 100%;
+  }
+}
+
+#bg_selector {
+  text-align: center;
+  font-size: smaller;
+  margin: 3px;
+}
+
+h1, h2, h3 {
+//    font-family: 'Arvo', Georgia, Times, serif;
+    border-bottom: 1px solid $lightgray_on_gray;
+}
+
+h1 {
+  word-spacing: 1px;
+  text-shadow: #999 0 -1px;
+  font-size: 2.5em;
+  line-height: 48px;
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-size: 1.75em;
+  line-height: 48px;
+  margin-bottom: 24px;
+//  margin-top: 30px;
+}
+
+h3 {
+    font-size: 1.25em;
+    line-height: 24px;
+    margin-bottom: 24px;
+}
+/* Search page */
+
+#search_form_outer {
+    margin: 40px 10px;
+    
+    #arrow-down {
+    	width: 0;
+    	height: 0;
+    	border-left: 50px solid transparent;
+    	border-right: 50px solid transparent;
+
+        margin: 0 auto;
+
+    	border-top: 50px solid #000;
+    }
+    
+}
+
+#search_form_container {
+  background-color: #000;
+  border-radius: 3px;
+  
+  form {
+      padding: 10px 10px 20px 10px;
+  }
+  
+  .filter_button {
+      font-size: 0.7em;
+      margin: 5px 15px;
+  }
+
+  select {width: 100%;}
+
+  .explanation {
+      margin-top: 10px;
+      font-weight: bold;
+  }
+
+  #submit_link_cont {
+      text-align: center;
+  }
+
+  #submit_link {
+    font-size: 1.5em;
+  }
+}
+
+.subfield {
+  margin-left: 25px;
+
+  .example {
+    color: $almost_white;
+    font-size: smaller;
+    font-style: italic;
+  }
+}
+
+#search_map {
+  width: 700px;
+  height: 550px;
+}
+
+#legend {
+  font-size: smaller;
+  max-width: 218px;
+  border: 1px solid #444;
+  margin: 5px;
+
+  h1 {
+    text-align: center;
+    border: 0;
+    margin: 0;
+    font-size: 2em;
+    height: auto;
+    color: $light_blue;
+  }
+
+  .legend_entry {
+    padding: 5px;
+    background-color: black;
+    border-bottom: 1px solid #222;
+
+    p.filter {
+      margin-left: 10px;
+    }
+
+    .buttons {
+      font-size: smaller;
+      margin-top: 5px;
+      
+    }
+
+    /* close */
+    .ui-button-icon-only { 
+      width: 14px;
+      height: 14px;
+    } 
+
+    div.title {
+      .color_box {
+	width: 12px;
+	height: 12px;
+	float: left;
+	border: 3px solid $container_bg_color;
+      }
+
+      .closebutton {
+	float: right;
+      }
+      /*border-bottom: 1px solid $lightgray_on_black;*/
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+  }
+}
+
+
+#ui-datepicker-div, .colorpicker
+    {
+        z-index: 9999999 !important;
+    }
+
+div.rt_container {
+  max-height: 400px;
+  overflow: auto;
+}
+
+table.textresults {
+  width: 680px;
+  margin: 10px auto;
+  border-collapse: collapse;
+  color: black;
+  background-color: white;
+  font-size: smaller;
+
+  tr:hover {
+    background-color: $green;
+  }
+
+  tr,td{
+    border: 2px solid $green;
+  }
+}
+
+td.observers {
+  max-width: 400px;
+}
+
+
+/* Browse page */
+
+#gen_container {
+  font-size: smaller;
+  text-align: right;
+  margin: 7px 0;
+}
+
+#results {
+  margin-top: 25px;
+  overflow: auto;
+
+  a#dl_checklists_button {
+    float: right;
+  }
+}
+
+div.checklist {
+  line-height: 1.30em;
+  margin: 25px 0;
+  overflow: auto;
+
+  .cl_meta {
+    background-color: black;
+    border-radius: 3px;
+    
+    table {
+        width: 100%;
+        margin: 10px;
+    
+        tr {
+            td:first-child {
+                font-weight: bold;
+            };
+        }
+    }
+  }
+
+  a {
+    color: $lightblue;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+#browse_map {
+  width: 940;
+  height: 700px;
+}
+
+#footer {
+  border-top: 1px solid $lightgray_on_gray;
+  text-align: center;
+  margin-top: 30px;
+  padding: 15px;
+  font-size: 12px;
+}
+
+p.longtext {
+    line-height: 30px;
+    font-size: 110%;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+

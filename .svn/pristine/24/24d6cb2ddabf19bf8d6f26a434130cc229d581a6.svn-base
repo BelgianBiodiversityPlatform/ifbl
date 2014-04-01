@@ -1,0 +1,129 @@
+IFBL: Configure Geoserver
+=========================
+
+Note for data layers originating from PostGIS:
+
+If you have different postgres schemas - for example to isolate PostGIS - 
+we have to create a specific user and execute something like "alter user myuser set search_path to gis,public", 
+because Geoserver is not able to let us configure access to multiple schemas simultaneously. 
+
+1. Layouts
+==========
+
+These layouts are used to add fixed images to printable maps (BBPF logo, legend for ecoregions, ...).
+
+Layouts are configured manually (command-line in geoserver). In geoserver data dir, we should also a "layouts" directory containing two files:
+
+ifbl\_print\_w\_ecoregions.xml:
+
+    <layout>
+        <decoration type="image" affinity="bottom,left" offset="36,36">
+            <option name="url" value="http://home.bebif.be/ifbl/images/bbpf_logo.png"/>
+        </decoration>
+        <decoration type="image" affinity="bottom,left" offset="36,200">
+            <option name="url" value="http://home.bebif.be/ifbl/images/ecoregion_legend.png"/>
+        </decoration>
+    </layout>
+
+ifbl\_print.xml:
+
+Idem, but without the second (ecoregion) "decoration" block.
+
+Of course, path to the image files should be adapted to the current configuration.
+
+2. Styles (SLD)
+===============
+
+A few styles are needed for the webapp and the printable maps feature. These styles can be found in the sld directory.
+
+Please keep their correct name (they are sometimes explicitly required in WMS requests).
+
+* **ecoregions.xml** for bbpf:ecoregions (static colors for Ecoregions of Belgium)
+* **ifbl_noparam.xml** is used on the two layers in use on the browse page of the website (green square with opaque black border).
+* **ifbl_param.xml** is used on the search page (two layers) to display data: the squares have no border, are transparent (opacity=0.4) and their color is configurable.
+* **ifbl_param_print.xml** is similar to ifbl_param BUT opacity is set to 1. This is used for printable maps, because as we have a very light backgound, we want to cover it more.
+* **ifbl_print_background.xml** is used to style the country borders layer in printable maps. It is very minimal.    
+
+3. Workspaces
+=============
+
+We create an ifbl workspace for specific data, and use a bbpf workspace for more generic data (ecoregions of Belgium, country boundaries, ...)
+
+4. Layers
+=========
+
+ifbl:areas\_4\_derived\_from\_1
+-------------------------------
+
+Use: Used on the browse page to show the large (generalized) squares.   
+SRS: EPSG:3857 (google Mercator)  
+Default Style: ifbl\_noparam  
+Other available styles: /  
+Data source: areas\_4\_derived\_from\_1 table (from the IFBL database)  
+
+ifbl:areas\_with\_direct\_cheklists
+-----------------------------------
+
+Use: Use on the browse page to show the detailed, non-generalized squares  
+SRS: EPSG:3857  
+Default Style: ifbl\_noparam   
+Other available styles:   
+Data source: areas\_with\_direct\_checklists (from the IFBL database)  
+
+ifbl:squares\_per\_species\_and\_time
+-------------------------------------
+
+Use: Queryable layer to display where a species occurs, optionaly with date and/or square filters (non-generalized layer). Used on search page and on printable maps.  
+SRS: EPSG: 3857  
+Default Style: ifbl\_param  
+Other available styles: ifbl\_param\_print  
+Data source: 
+
+We have to create an SQL view in Geoserver to handle this:
+
+    SELECT areas.the_geom, areas.ifbl_code, count(*) AS nb_observations, observations.species_id
+    FROM nbgb_ifbl.areas, nbgb_ifbl.checklists, nbgb_ifbl.observations
+    WHERE checklists.area3_id = areas.id AND observations.checklist_id = checklists.id
+    AND ((checklists.begin_date, checklists.end_date) OVERLAPS (DATE '%range_start%', DATE '%range_end%'))
+    GROUP BY areas.ifbl_code, areas.the_geom, observations.species_id
+
+Sql parameters:
+
+    range_start + 1000-01-01 + ^\d\d\d\d-\d\d-\d\d$
+    range_end + 70000-12-31 + ^\d\d\d\d-\d\d-\d\d$
+
+Attributes:
+
+    the_geom + geometry + 3857
+    
+ifbl:squares4\_per\_species\_and\_time
+--------------------------------------
+
+Use: Queryable layer to display where a species occurs, optionaly with date and/or square filters (generalized layer). Used on search page and on printable maps.
+Configuration: perfect clone of ifbl:squares\_per\_species\_and\_time, except:
+
+    WHERE checklists.area2_id =
+    
+bbpf:TM\_WORLD\_BORDERS-0
+-------------------------
+
+Use: On printable maps, country borders  
+SRS: EPSG:3857 (reproject native to declared)  
+Default style: ifbl_print_background  
+Other available styles: /  
+Data source: shapefile (should be in our shapefile bank)
+
+bbpf:ecoregions
+---------------
+
+Use: Ecoregions overlay (on search, browse and printable map)  
+SRS: EPSG:3857 (reproject native to declared)  
+Default style: ecoregions  
+Other available styles: /  
+Data source: shapefile (should be in our shapefile bank)
+
+
+
+
+       
+ 

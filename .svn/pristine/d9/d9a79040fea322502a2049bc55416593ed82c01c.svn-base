@@ -1,0 +1,43 @@
+# Basic working httpd.conf to share an URL between a rails application and GeoServer
+# Used to prevent SOP issues
+
+# App will be available at http://localhost
+# Geoserver at http://localhost/geoserver/ (<-- don't forget the trailing slash).
+# For example, WMS are at: http://localhost/geoserver/ifbl/wms
+
+# Generic config
+
+Listen 80
+
+User http
+Group http
+
+LoadModule proxy_module      modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule headers_module    modules/mod_headers.so
+LoadFile   /usr/lib/libxml2.so
+LoadModule proxy_html_module modules/mod_proxy_html.so
+LoadModule xml2enc_module modules/mod_xml2enc.so
+
+# !! Disable open proxy mode !!
+ProxyRequests off
+
+# Generic option, needed by Geoserver/Jetty
+ProxyPreserveHost On 
+
+# Geoserver proxying
+# Thanks to the ProxyPreserveHost directive, no ProxyPassReserve is needed for Geoserver, only this directive
+ProxyPass /geoserver/ http://localhost:8080/geoserver/
+
+# Webrick proxying
+ProxyPass / http://127.0.0.1:3000/
+ProxyHTMLURLMap http://127.0.0.1:3000 /
+<Location />
+        ProxyPassReverse /
+        ProxyHTMLEnable On
+        ProxyHTMLURLMap  /      /
+        RequestHeader    unset  Accept-Encoding
+</Location>
+
+# This proxying is transparent, no configuration needed nor in OpenLayers, nor in webrick, nor in Jetty
+

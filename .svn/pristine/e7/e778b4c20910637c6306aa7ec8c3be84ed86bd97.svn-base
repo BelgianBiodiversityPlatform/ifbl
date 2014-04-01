@@ -1,0 +1,35 @@
+CREATE TABLE inbo_dwca
+(
+  guid character varying(32),
+  decimallatitude double precision,
+  occurrencedetails text,
+  verbatimtaxonrank character varying(8),
+  coordinateuncertaintyinmeters integer,
+  verbatimcoordinatesystem character varying(8),
+  eventdate text,
+  country character varying(2),
+  taxonrank character varying(32),
+  language character varying(8),
+  verbatimlocality text,
+  basisofrecord character varying(32),
+  decimallongitude double precision,
+  geodeticdatum character(5),
+  collectioncode character varying(12),
+  catalognumber integer NOT NULL,
+  scientificname character varying(64),
+  modified date,
+  recordedby text,
+  institutioncode character varying(4),
+  nomenclaturalcode character(4),
+  originalnameusage text,
+  verbatimcoordinates character varying(8),
+  CONSTRAINT inbo_dwca_pkey PRIMARY KEY (catalognumber )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE inbo_dwca
+  OWNER TO nnoe;
+
+
+COPY inbo_dwca FROM '/home/nnoe/dwca-florabank/occurrence.txt' DELIMITER '\t';

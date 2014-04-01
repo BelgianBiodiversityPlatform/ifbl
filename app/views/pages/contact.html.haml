@@ -1,0 +1,287 @@
+.grid_12
+  %h1#contact_title Contact us 
+  %p
+    If you're interested in the publication of biodiversity data, contact
+    =link_to 'Dimitri Brosens', 'mailto:Dimitri.BROSENS@INBO.BE' 
+    (Belgian Biodiversity Platform).
+  
+  .grid_5.alpha.prefix_1.contact_block  
+    %h2#title_contact_science Scientific editors
+    %address
+      %b Wouter Van Landuyt
+      -# %br
+      -#       wouter.vanlanduyt@inbo.be
+      %br
+      =link_to 'Instituut voor natuur- en bosonderzoek', 'http://www.inbo.be/'
+      %br
+      Kliniekstraat 25
+      %br
+      1070 Brussels - Belgium
+      %br 
+      +32 (0)2 525.02.96 
+    
+    %address
+      %b Fabienne Van Rossum
+      -# %br
+      -#       fabienne@br.fgov.be
+      %br
+      =link_to 'National Botanic Garden of Belgium', 'http://www.br.fgov.be'
+      %br
+      Bouchout Domain - Nieuwelaan 38
+      %br
+      1860 Meise - Belgium
+    
+    
+  .grid_5.omega.suffix_1.contact_block
+    %h2#title_contact_web Website
+    %address
+      %b Nicolas Noé
+      -# %br
+      -#       n.noe@biodiversity.be
+      %br
+      =link_to 'Belgian Biodiversity Platform', 'http://www.biodiversity.be'
+      \/ ULB
+      %br
+      ULB - Campus de la Plaine CP 257
+      %br
+      1050 Brussels - Belgium
+      %br
+      +32 (0)2 650.57.52
+   
+.clear
+
+.grid_12{style: 'text-align: center;'}
+  %a#mail_form Send us an email
+
+.grid_12
+  %h1#links_title Links
+
+.clear
+.grid_11.prefix_1   
+  -links = [{:name => 'Belgian Biodiversity Platform', 
+    :url => 'http://www.biodiversity.be',
+    :logo => 'bbpf_link.png',
+    :text => 'The Belgian Biodiversity Platform is the information and communications hub on biodiversity science and research in Belgium.'},
+  {:name => 'Instituut voor Natuur- en Bosonderzoek', 
+  :url => 'http://www.inbo.be',
+  :logo => 'inbo_link.png',
+  :text => 'The Research Institute for Nature and Forest (INBO) is the Flemish research and knowledge centre for nature and its sustainable management and use.'},
+  {:name => 'National Botanic Garden of Belgium', 
+  :url => 'http://www.br.fgov.be',
+  :logo => 'nbgb_link.png',
+  :text => 'The National Botanic Garden of Belgium is a centre of excellence for science and horticulture.'},
+  {:name => 'FLO.WER', 
+  :url => 'http://www.plantenwerkgroep.be',
+  :logo => 'pw_link.png',
+  :text => 'FLO.WER (Floristische werkgroepen) is the overarching organisation of floristic working groups in Flanders.'},
+  {:name => 'Global Biodiversity Information Facility', 
+  :url => 'http://www.gbif.org',
+  :logo => 'gbif_link.png',
+  :text => 'The Global Biodiversity Information Facility (GBIF) was established by governments in 2001 to encourage free and open access to biodiversity data, via the Internet.'},
+  {:name => 'Belgian Data Portal', 
+  :url => 'http://data.biodiversity.be',
+  :logo => 'bdp_link.png',
+  :text => 'This portal provides access to biodiversity data pertaining to Belgium.'},
+  {:name => 'Florabank',
+  :url => 'http://flora.inbo.be',
+  :logo => 'florabank_link.png',
+  :text => 'Florabank is the database that deals with the distribution data on the wild flora (indigenous species, archeophytes and naturalised aliens) of Flanders and the Brussels Capital Region.'},
+  {:name => 'INBO IPT Instance',
+  :url => 'http://ipt.inbo.be',
+  :logo => 'inbo_ipt_link.png',
+  :text => 'The online resource for data published by INBO.'}]  
+  
+  -links.each do |l|
+    =render :partial => 'link', :locals => l
+
+#dialog-success{title: 'Your message has been sent successfully'}
+  %h2 Thanks for your message !
+
+#dialog-form{title: 'Contact us'}
+  #tips_outer
+    %ul#validate_tips
+
+  %form
+    %fieldset
+    %table
+      %tr
+        -# Make the label columns wider
+        %td{style: 'width: 220px'}
+          %label{for:'name'} Your name:
+        %td  
+          %input#name{type: 'text'}
+    
+      %tr
+        %td
+          %label{for:'email'} Your e-mail address:
+        %td  
+          %input#email{type: 'text'}
+      
+      %tr
+        %td
+          This message concerns:
+        %td#for_checkboxes
+          %input#for_scientists{type: 'checkbox', checked: 'checked'}
+          %label{for:'for_scientists'} The scientific editors
+          %br
+          
+          %input#for_web{type: 'checkbox', checked: 'checked'}
+          %label{for:'for_web'} The website team
+          
+      %tr
+        %td
+          %label{for:'title'} Object:
+        %td  
+          %input#title{type: 'text'}
+          
+      %tr
+        %td
+          %label{for:'content'} Your message:
+        %td  
+          %textarea#content{cols: '60', rows: '12'}
+    
+:javascript
+  $(function(){
+    //IFBL.current_page.original_contact_content = $('#dialog-form').html();
+    
+    $('.link_entry').click(function(elem) {
+      window.location = $(this).attr('data-url');
+    });
+    
+    $('#dialog-success').dialog({
+      autoOpen: false,
+      hide: "fade",
+      width: 400
+      });
+    
+    $('#dialog-form').dialog({
+      autoOpen: false,
+      modal: true,
+      width: 700,
+      hide: "fade",
+      buttons: {
+        "Send your message": function() {
+        
+        if (IFBL.current_page.validateContactForm()) {
+          $.ajax({
+            type: 'POST',
+            url: '#{url_for(:controller => 'ajax', :action => 'send_contact_mail')}',
+            data: {
+              'name' : IFBL.current_page.dom.c_fields.name.val(),
+              'sender': IFBL.current_page.dom.c_fields.email.val(),
+              'for_scientists': IFBL.current_page.dom.c_fields.for_scientists.is(':checked'),
+              'for_web': IFBL.current_page.dom.c_fields.for_web.is(':checked'),
+              'title': IFBL.current_page.dom.c_fields.title.val(),
+              'content': IFBL.current_page.dom.c_fields.content.val()
+            },
+            success: function(data) {
+              if (data === true) {
+                
+                 $('#dialog-form').dialog("close");
+                 $('#dialog-success').dialog("open");
+                
+                window.setTimeout(function() {
+                                  $('#dialog-success').dialog("close");
+               
+                }, 4000);
+                
+              } else { // Server replier "error"
+                
+              }
+              
+            }
+          });
+        }
+          
+        }}
+    });
+    
+    $('#mail_form')
+      .button({icons: {primary: 'ui-icon-mail-closed'}})
+      .click(function() {
+        $('#dialog-form').dialog("open");
+      });
+    
+    // Sets the HTML hooks used by various methods
+    IFBL.current_page.dom = {};
+    IFBL.current_page.dom.tips = $('#validate_tips');
+    IFBL.current_page.dom.tips_outer = $('#tips_outer');
+    
+    IFBL.current_page.dom.c_fields = {
+      'name'            : $('#name'),
+      'email'           : $('#email'), 
+      'for_scientists'  : $('#for_scientists'),
+      'for_web'         : $('#for_web'),
+      'for_checkboxes'  : $('#for_checkboxes'),
+      'title'           : $('#title'),
+      'content'         : $('#content') 
+    };
+    
+    IFBL.current_page.validateContactForm = function() {
+      // 1. Get access to fields
+      var valid;
+      
+      // Some shortcuts
+      var fields = IFBL.current_page.dom.c_fields;  
+      var checkLength = IFBL.current_page.checkLength;
+      var checkEmailFormat = IFBL.current_page.checkEmailFormat;
+      
+      // 2. Validates!
+      valid = true;
+      IFBL.current_page.emptyTips();
+      
+      valid = checkLength(fields.name, "name", 3, 50) && valid;
+      valid = checkLength(fields.email, "e-mail", 6, 80) && valid;
+      valid = checkEmailFormat(fields.email, "Your e-mail address appears incorrect." ) && valid;
+      
+      fields.for_checkboxes.removeClass( "ui-state-error" );
+      if(!fields.for_scientists.is(':checked') && !fields.for_web.is(':checked')) {
+        fields.for_checkboxes.addClass( "ui-state-error" );
+        valid = false;
+        IFBL.current_page.addTip('You should check at least one of the boxes in the "This message concerns" section.');
+      }
+      
+      valid = checkLength(fields.title, "Title", 3, 80) && valid;
+      valid = checkLength(fields.content, "Your message", 3, 5000) && valid;
+      
+      return valid;
+    };
+    
+    IFBL.current_page.emptyTips = function() {
+      IFBL.current_page.dom.tips.empty();
+    };
+    
+    IFBL.current_page.addTip = function(t) {
+      var tips = IFBL.current_page.dom.tips;
+      IFBL.current_page.dom.tips_outer
+        .addClass("ui-state-highlight");
+      
+      tips
+        .append('<li>' + t + '</li>');
+    };
+    
+    IFBL.current_page.checkLength = function(o, n, min, max) {
+      o.removeClass("ui-state-error"); // Le bénéfide du doute
+      if ( o.val().length > max || o.val().length < min ) {
+        o.addClass( "ui-state-error" );
+      	IFBL.current_page.addTip( "Length of " + n + " must be between " +
+      	min + " and " + max + "." );
+      	return false;
+      } else { return true; }
+    };
+    
+    IFBL.current_page.checkEmailFormat = function(o, n) {
+      o.removeClass("ui-state-error"); // Le bénéfice du doute
+      return IFBL.current_page.checkRegexp(o, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i,n);
+    };
+    
+    IFBL.current_page.checkRegexp = function( o, regexp, n ) {
+      if ( !( regexp.test( o.val() ) ) ) {
+    	  o.addClass( "ui-state-error" );
+    		IFBL.current_page.addTip(n);
+    		return false;
+    	} else { return true; }
+    };
+    
+  });
+  

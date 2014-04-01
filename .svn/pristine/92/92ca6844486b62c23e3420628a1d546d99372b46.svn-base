@@ -1,0 +1,31 @@
+IFBL: TODO list
+===============
+
+
+
+o  Pour v1.2 et  + 
+
+- Make easy/flexible WMS server configuration (ONE variable, in settings file ?)
+-Code cleaning (always ask SLD explicitely ?)
+- SLD ecoregions: name the layers correctly (in English).
+-Déplacer aussi ce TODO dans doc
+Ensure ecoregions and TM_WORLD_BORDERS are in our shapefiles bank.
+
+Module impression:
+legende pour les data ?
+plusieurs layers simultanément ?
+configuration d’impression ?
+Documenter en détail config Geoserver
+Statistiques pour Sonia:
+Pour chaque espèce, histogramme par tranches d’années
+Pour chaques espèce, histogramme par ecoregion
+Combinaison des deux: A tel moment, répartition par ecoreégion de l’espèce, et comparaison avec une autre période
+Recherche en utilisant un autocompleter Ajax (plus rapide a manipuler que le SELECT)
+Back To Top aussi sur Browse en dessous de chaque bloc (chiant car JS et BTT est un helper) 
+Show Data last updated per dataset/ (date of the DwcA file, not date of website update) (load on data import)
+Import script & doc cleanup
+Nom de download (au moins pour le KML)
+Affiner design tout en douceur
+Referencing
+Optimize page load
+Load of text results (on first page, before button becomes clickable) should be optimized.

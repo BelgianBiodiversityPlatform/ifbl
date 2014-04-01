@@ -1,0 +1,39 @@
+-- DB provided by Andre has a inbo_dwca table, but the field order seems different in the source file, so we re-create the table here.
+
+DROP TABLE inbo_dwca;
+CREATE TABLE inbo_dwca
+(
+  guid character varying(32),
+  verbatimtaxonrank character varying(8),
+  occurrencedetails text,
+  originalnameusage text,
+  coordinateuncertaintyinmeters integer,
+  country character varying(2),
+  verbatimcoordinatesystem character varying(8),
+  institutioncode character varying(4),
+  language character varying(8),
+  taxonrank character varying(32),
+  nomenclaturalcode character(4),
+  basisofrecord character varying(32),
+  recordedby text,
+  verbatimcoordinates character varying(8),
+  geodeticdatum character(5),
+  modified date,
+  collectioncode character varying(12),
+  eventdate text,
+  decimallongitude double precision,
+  scientificname character varying(64),
+  decimallatitude double precision,
+  verbatimlocality text,
+  catalognumber integer NOT NULL,
+    
+  CONSTRAINT inbo_dwca_pkey PRIMARY KEY (catalognumber )
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE inbo_dwca
+  OWNER TO nnoe;
+
+
+COPY inbo_dwca FROM '/home/nnoe/dwca-florabank/occurrence.txt' DELIMITER '\t';

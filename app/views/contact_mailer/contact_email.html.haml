@@ -1,0 +1,19 @@
+!!!
+%html
+  %head
+  %body
+    %p
+      A new message has been sent through the IFBL website:
+    %p
+      —————————————————————————————————————————————————————
+      
+    %p
+      %b Sender: 
+      = "#{@sender_name} (<#{@sender_address}>)"
+    %p
+      %b Object:
+      = @my_subject
+    %p
+      %b Message:
+      = @message
+      

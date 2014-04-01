@@ -1,0 +1,30 @@
+IFBL: Run the app
+=================
+
+Final configuration:
+
+WMS URL
+-------
+
+in application.js, configure:
+    IFBL.constants.wms_url 
+
+In production, we set it to: "http://projects.biodiversity.be/geoserver2/ifbl/wms". This is not the real server (it's at gis.biodiversity.be), but this is a proxy Julien 
+had to setup to avoir same-origin-policy issues.
+
+Project date:
+-------------
+
+Change "last data update" field in webpage to reflect Florabank date
+
+Run on dev (http://home.bebif.be/ifbl)
+---------------------------------- 
+
+    $ unicorn_rails -D -p 3008 --path /ifbl
+
+Run on production machine (http://projects.biodiversity.be/ifbl)
+------------------------------------------------------------
+
+    $ sudo -H -u www-ifbl bash --login (to have a correct shell environment that plays nicely with RVM)
+    $ rvm 1.9.2@ifbl (to load correct ruby&gems version)
+    $ unicorn_rails -E production -p 5021 --path /ifbl

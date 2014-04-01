@@ -1,0 +1,98 @@
+!!!
+%html
+  %head
+    %title IFBL
+
+    =javascript_include_tag 'jquery.min.js'
+    =javascript_include_tag 'rails.js'
+
+    =stylesheet_link_tag '960_12_col.css'
+    =stylesheet_link_tag 'text.css'
+    =stylesheet_link_tag 'reset.css'
+    =stylesheet_link_tag 'application.css'
+
+    =stylesheet_link_tag 'custom-theme/jquery-ui-1.8.17.custom.css'
+    
+    =stylesheet_link_tag 'http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic'
+    
+    =javascript_include_tag 'jquery-ui-1.8.14.custom.min.js'
+    =javascript_include_tag 'jquery.scrollintoview.min.js'
+    =javascript_include_tag 'jquery.simpletooltip-min.js'
+
+    =javascript_include_tag 'http://maps.google.com/maps/api/js?sensor=false&v=3.6' unless @no_map
+    =javascript_include_tag 'OpenLayers-dev/OpenLayers.js' unless @no_map
+    =javascript_include_tag :defaults
+    
+    -if @include_colorpicker
+      =stylesheet_link_tag 'colorpicker.css'
+      =javascript_include_tag 'colorpicker.js'
+    
+    -if @include_fancyzoom
+      =javascript_include_tag 'FancyZoom/js-global/FancyZoom.js'
+      =javascript_include_tag 'FancyZoom/js-global/FancyZoomHTML.js'
+    
+    =csrf_meta_tag
+
+    :javascript
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-30737834-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+  %body
+    #container.container_12
+      .grid_10.prefix_2
+        %ul#main_menu
+
+          -menu_data = [{:name => 'Search', :desc => 'by plant species',:action => 'search' },
+			{:name => 'Browse', :desc => 'by geographic zone', :action => 'browse'},
+			{:name => 'Metadata', :desc => 'and taxonomic coverage', :action => 'metadata'},
+			{:name => 'Methodology', :desc => 'The IFBL Methodology', :action => 'methodology'},
+			{:name => 'Contact', :desc => '+ links', :action => 'contact'},
+			{:name => 'About', :desc => 'this website', :action => 'about'}]
+      
+
+          -menu_data.each do |m|
+            - m_url = {:controller => 'pages', :action => m[:action]}
+            - if current_page? m_url
+              %li.selected
+                =link_to m[:name], m_url
+                <br/>
+                %span.subtitles=m[:desc]
+            - else
+              %li
+                =link_to m[:name], m_url
+                <br/>
+                %span.subtitles=m[:desc]
+
+      .clear
+      
+      #banner_outer
+        =image_tag 'banner.png'
+
+      .clear
+      #page_top
+      = yield
+
+      .clear
+      #footer
+        Website developped by the
+        = succeed '.' do 
+          =link_to 'Belgian Biodiversity Platform', 'http://www.biodiversity.be'
+          
+        %p This website requires a modern, standards compliant browser. Last updated: 2012-04-10.
+    .clear
+    
+    #gene_help{:style => 'display: none;'}
+      On low zoom levels, show data on a 4km grid (instead of "as detailed as possible")
+    
+    :javascript
+          $(document).ready(function() {
+            IFBL.helpers.equalHeight($(".equal_height_columns"));
+            $('.geb').simpletooltip({ showEffect: "fadeIn", hideEffect: "fadeOut" } );
+          });
