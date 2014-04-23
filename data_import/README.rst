@@ -3,11 +3,12 @@ TODO
 
 * Read Dimi's mail to see what he expects from this new import.
 * Regarder webapp (migrations)
+* Import details about Geoserver, etc... in data_import_2012/README.txt (to move here)
 
 Summary
 =======
 
-This directory contains the updated (2014) import scripts for the IFBL project.
+This directory contains the updated (2014) import scripts and documentation for the IFBL project.
 
 Input:
 ------
@@ -26,4 +27,20 @@ Content
 =======
     * ifbl_csv_source: source data from IFBL Digit Calls
     * previous_imports: previous import scripts given by andre
+
+Instructions
+============
+
+Automatically
+-------------
+::
+
+    $ pip install -r requirements.txt
+    $ ./import_all.py
+
+Manually
+---------
+
+$ createdb ifbl  # Create database
+$ psql -d ifbl -f 00.sql
     
