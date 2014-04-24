@@ -42,5 +42,12 @@ Manually
 ---------
 
 $ createdb ifbl  # Create database
-$ psql -d ifbl -f 00.sql
+
+TODO: Document from Python script
+
+
+Changé depuis André, à checker:
+-------------------------------
+
+00_input_schema.sql: retiré tables ifbl_square et aggregate array_accum
     
