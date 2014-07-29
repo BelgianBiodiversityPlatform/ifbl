@@ -62,14 +62,14 @@ def load_sqlfile(filename, db_params):
     return exec_shell(cmd)
 
 
-def copy_csvfile_to_table(f, table_name, db_params):
+def copy_csvfile_to_table(f, table_name, delimiter, db_params):
     with DBConnection(db_params) as conn:
         cur = conn.cursor()
 
         # cur.copy_from is shitty() (quotes, error messages, ...)
         # so we have to reinvent the wheel
         # UGLY UGLY UGLY (but works)
-        input_file = csv.DictReader(f)
+        input_file = csv.DictReader(f, delimiter=delimiter)
         for row in input_file:
             fields_list, values_list = [], []
             for k, v in row.iteritems():

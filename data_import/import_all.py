@@ -15,8 +15,14 @@ DB_CONF = {'name': 'ifbl',
            'encoding': 'UTF8',
            'username': 'nicolasnoe'}
 
+# Source files to import
+DATA_SOURCES = [{'fn': './ifbl_csv_source/IFBL2009.csv', 'delimiter': ',', 'table': 'ifbl_2009'},
+                {'fn': './ifbl_csv_source/IFBL2010.csv', 'delimiter': ',', 'table': 'ifbl_2010'},
+                {'fn': './ifbl_csv_source/IFBL2013.csv', 'delimiter': ';', 'table': 'ifbl_2013'}]
+                    
 
 def main(prog_args):
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # No need to flush
     o = sys.stdout
 
     if check_db_existence(DB_CONF):
@@ -30,8 +36,12 @@ def main(prog_args):
     make_action_or_exit("Creating database...", o, create_database, DB_CONF)
     make_action_or_exit("Creating input schema...", o, load_sqlfile, '00_input_schema.sql', DB_CONF)
 
-    fn = os.path.join(os.path.dirname(__file__), './ifbl_csv_source/IFBL2009.csv')
-    copy_csvfile_to_table(open(fn), 'ifbl_2009', DB_CONF)
+    # CSV Source files copy
+    for source in DATA_SOURCES:
+        o.write("Importing {fn}...".format(fn=source['fn']))
+        f = open(os.path.join(os.path.dirname(__file__), source['fn']))
+        copy_csvfile_to_table(f, source['table'], source['delimiter'], DB_CONF)
+        o.write("DONE\n")
 
 
 if __name__ == "__main__":
