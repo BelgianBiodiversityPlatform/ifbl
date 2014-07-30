@@ -78,13 +78,7 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
                 fields_list.append('"' + k + '"')
                 values_list.append(v)
 
-            placeholders = ""
-            for i, val in enumerate(fields_list):
-                placeholders += "%s"
-                if i != len(fields_list) - 1:
-                    placeholders += ','
-
-            s = "INSERT INTO " + table_name + " ({fields})".format(fields=','.join(fields_list)) + " VALUES (" + placeholders + ")"
+            s = "INSERT INTO " + table_name + " ({fields})".format(fields=','.join(fields_list)) + " VALUES (" + _get_placeholders_string(fields_list) + ")"
             cur.execute(s, tuple(values_list))
             if cur.rowcount != 1:
                 output_stream.write("ERROR: rowcount is {rowcount} for {query}\n".format(rowcount=cur.rowcount, query=s))
@@ -93,3 +87,14 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
 
         conn.commit()
         output_stream.write("{i} processed rows ".format(i=processed_rows_counter))
+
+
+def _get_placeholders_string(fields_list):
+    placeholders_string = ""
+    
+    for i, val in enumerate(fields_list):
+        placeholders_string += "%s"
+        if i != len(fields_list) - 1:
+            placeholders_string += ','
+
+    return placeholders_string
