@@ -72,14 +72,20 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
         input_file = csv.DictReader(f, delimiter=delimiter)
 
         processed_rows_counter = 0
-        for row in input_file:
-            fields_list, values_list = [], []
-            for k, v in row.iteritems():
-                fields_list.append('"' + k + '"')
-                values_list.append(v)
+        fields_list = []
+        #all_values = []
 
-            s = "INSERT INTO " + table_name + " ({fields})".format(fields=','.join(fields_list)) + " VALUES (" + _get_placeholders_string(fields_list) + ")"
-            cur.execute(s, tuple(values_list))
+        for row in input_file:
+            values = ()
+            for k, v in row.iteritems():
+                if processed_rows_counter == 0:  # Only needed once!
+                    fields_list.append('"' + k + '"')
+
+                values = values + (v,)
+
+            s = _get_insert_string(table_name, fields_list)
+
+            cur.execute(s, values)
             if cur.rowcount != 1:
                 output_stream.write("ERROR: rowcount is {rowcount} for {query}\n".format(rowcount=cur.rowcount, query=s))
 
@@ -87,6 +93,11 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
 
         conn.commit()
         output_stream.write("{i} processed rows ".format(i=processed_rows_counter))
+
+
+def _get_insert_string(table_name, fields_list):
+    return ("INSERT INTO " + table_name + " ({fields})".format(fields=','.join(fields_list)) +
+            " VALUES (" + _get_placeholders_string(fields_list) + ")")
 
 
 def _get_placeholders_string(fields_list):
