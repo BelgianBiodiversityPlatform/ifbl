@@ -62,7 +62,7 @@ def load_sqlfile(filename, db_params):
     return exec_shell(cmd)
 
 
-def copy_csvfile_to_table(f, table_name, delimiter, db_params):
+def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
     with DBConnection(db_params) as conn:
         cur = conn.cursor()
 
@@ -70,6 +70,8 @@ def copy_csvfile_to_table(f, table_name, delimiter, db_params):
         # so we have to reinvent the wheel
         # UGLY UGLY UGLY (but works)
         input_file = csv.DictReader(f, delimiter=delimiter)
+
+        processed_rows_counter = 0
         for row in input_file:
             fields_list, values_list = [], []
             for k, v in row.iteritems():
@@ -84,4 +86,10 @@ def copy_csvfile_to_table(f, table_name, delimiter, db_params):
 
             s = "INSERT INTO " + table_name + " ({fields})".format(fields=','.join(fields_list)) + " VALUES (" + placeholders + ")"
             cur.execute(s, tuple(values_list))
-            conn.commit()
+            if cur.rowcount != 1:
+                output_stream.write("ERROR: rowcount is {rowcount} for {query}\n".format(rowcount=cur.rowcount, query=s))
+
+            processed_rows_counter += 1
+
+        conn.commit()
+        output_stream.write("{i} processed rows ".format(i=processed_rows_counter))
