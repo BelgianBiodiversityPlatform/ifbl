@@ -16,3 +16,10 @@ def make_action_or_exit(action_description, output_stream, func, *func_args, **f
         sys.exit()
     output_stream.write("DONE")
     output_stream.write("\n")
+
+
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l.
+    """
+    for i in xrange(0, len(l), n):
+        yield l[i:i + n]

@@ -1,7 +1,7 @@
 import psycopg2
 import csv
 
-from utils import exec_shell
+from utils import exec_shell, chunks
 
 # TODO: Currently, this only works when Postgres user doesn't need to provide a password...
 # (Do this by using only psycopg2 instead of PG binaries - createdb, psql, ...) ?
@@ -62,6 +62,27 @@ def load_sqlfile(filename, db_params):
     return exec_shell(cmd)
 
 
+# dict keys: field name
+# dict value: value to insert
+def insert_dict_row(table_name, d, db_params):
+    with DBConnection(db_params) as conn:
+        cur = conn.cursor()
+
+        # keys and vals will have the same order
+        keys = []
+        vals = []
+        for k, v in d.iteritems():
+            keys.append(k)
+            vals.append(v)
+
+        s = _get_insert_string(table_name, keys)
+        cur.execute(s, tuple(vals))
+
+        import pdb; pdb.set_trace()
+
+        conn.commit()
+
+
 def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
     with DBConnection(db_params) as conn:
         cur = conn.cursor()
@@ -73,7 +94,7 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
 
         processed_rows_counter = 0
         fields_list = []
-        #all_values = []
+        all_values = []
 
         for row in input_file:
             values = ()
@@ -83,13 +104,16 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
 
                 values = values + (v,)
 
-            s = _get_insert_string(table_name, fields_list)
-
-            cur.execute(s, values)
-            if cur.rowcount != 1:
-                output_stream.write("ERROR: rowcount is {rowcount} for {query}\n".format(rowcount=cur.rowcount, query=s))
-
+            all_values.append(values)
             processed_rows_counter += 1
+
+        s = _get_insert_string(table_name, fields_list)
+
+        for vals in chunks(all_values, 500):
+            cur.executemany(s, vals)
+
+        #if cur.rowcount != 1:
+        #    output_stream.write("ERROR: rowcount is {rowcount} for {query}\n".format(rowcount=cur.rowcount, query=s))
 
         conn.commit()
         output_stream.write("{i} processed rows ".format(i=processed_rows_counter))
