@@ -1,7 +1,7 @@
 TODO
 ====
 
-
+* For consistency, add optional "commit" parameter to other "writing" helpers 
 
 * Read Dimi's mail to see what he expects from this new import.
 * Regarder webapp (migrations)

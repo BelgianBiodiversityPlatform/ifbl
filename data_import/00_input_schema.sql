@@ -39,15 +39,15 @@ CREATE TABLE ifbl_2013 (
 ) with OIDS;
 
 CREATE TABLE inbo_dwca ( --- Florabank
-    "scientificName" varchar(255),
-    "verbatimCoordinates" varchar(255),
-    "verbatimLocality" varchar(255),
-    "coordinateUncertaintyInMeters" varchar(255),
-    "verbatimCoordinateSystem" varchar(255),
-    "associatedReferences" varchar(255),
-    "eventDate" varchar(64),
-    "recordedBy" varchar(255),
-    "catalogNumber" varchar(255),
+    "scientificName" text,
+    "verbatimCoordinates" text,
+    "verbatimLocality" text,
+    "coordinateUncertaintyInMeters" text,
+    "verbatimCoordinateSystem" text,
+    "associatedReferences" text,
+    "eventDate" text,
+    "recordedBy" text,
+    "catalogNumber" text,
 
     primary key ("catalogNumber")
 );

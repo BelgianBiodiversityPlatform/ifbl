@@ -23,3 +23,34 @@ def chunks(l, n):
     """
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
+
+
+# From http://code.activestate.com/recipes/410692/
+# Python's lack of a 'switch' statement has garnered much discussion and even a PEP. The most
+# popular substitute uses dictionaries to map cases to functions, which requires lots of defs
+# or lambdas. While the approach shown here may be O(n) for cases, it aims to duplicate C's original
+#'switch' functionality and structure with reasonable accuracy.
+
+# This class provides the functionality we want. You only need to look at
+# this if you want to know how this works. It only needs to be defined
+# once, no need to muck around with its internals.
+class switch(object):
+    def __init__(self, value):
+        self.value = value
+        self.fall = False
+
+    def __iter__(self):
+        """Return the match method once, then stop"""
+        yield self.match
+        raise StopIteration
+    
+    def match(self, *args):
+        """Indicate whether or not to enter a case suite"""
+        if self.fall or not args:
+            return True
+        elif self.value in args:  # changed for v1.5, see below
+            self.fall = True
+            return True
+        else:
+            return False
+

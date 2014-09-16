@@ -64,6 +64,7 @@ def load_sqlfile(filename, db_params):
 
 # dict keys: field name
 # dict value: value to insert
+# TODO: Check it's in use?
 def insert_dict_row(table_name, d, db_params):
     with DBConnection(db_params) as conn:
         cur = conn.cursor()
@@ -77,8 +78,17 @@ def insert_dict_row(table_name, d, db_params):
 
         s = _get_insert_string(table_name, keys)
         cur.execute(s, tuple(vals))
+        conn.commit()
 
-        import pdb; pdb.set_trace()
+
+def insert_many(table_name, fields_list, all_values, db_params):
+    with DBConnection(db_params) as conn:
+        cur = conn.cursor()
+        
+        s = _get_insert_string(table_name, fields_list)
+
+        for vals in chunks(all_values, 500):
+            cur.executemany(s, vals)
 
         conn.commit()
 
@@ -100,7 +110,7 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
             values = ()
             for k, v in row.iteritems():
                 if processed_rows_counter == 0:  # Only needed once!
-                    fields_list.append('"' + k + '"')
+                    fields_list.append(k)
 
                 values = values + (v,)
 
@@ -120,8 +130,10 @@ def copy_csvfile_to_table(f, table_name, delimiter, output_stream, db_params):
 
 
 def _get_insert_string(table_name, fields_list):
-    return ("INSERT INTO " + table_name + " ({fields})".format(fields=','.join(fields_list)) +
-            " VALUES (" + _get_placeholders_string(fields_list) + ")")
+    quoted_field_list = [('"' + f + '"') for f in fields_list]
+
+    return ("INSERT INTO " + table_name + " ({fields})".format(fields=','.join(quoted_field_list)) +
+            " VALUES (" + _get_placeholders_string(quoted_field_list) + ")")
 
 
 def _get_placeholders_string(fields_list):
