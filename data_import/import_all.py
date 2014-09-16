@@ -13,7 +13,7 @@ from dwca.read import DwCAReader
 from dwca.darwincore.utils import qualname as qn
 
 from db_helpers import (check_db_existence, drop_database, create_database, load_sqlfile,
-                        copy_csvfile_to_table, insert_many)
+                        copy_csvfile_to_table, load_sqltemplate, insert_many)
 
 from utils import make_action_or_exit, switch
 
@@ -30,7 +30,7 @@ DATA_SOURCES = [{'fn': './ifbl_csv_source/IFBL2009.csv', 'delimiter': ',', 'tabl
 
 FLORABANK_DWCA = '/Users/nicolasnoe/Downloads/dwca-florabank1-occurrences.zip'
 
-START_AT = 'db_creation'
+START_AT = 'datacleaning'
 
 
 def db_creation_step(output_stream):
@@ -86,6 +86,11 @@ def load_florabank_step(output_stream):
         insert_many('inbo_dwca', [f[0] for f in fields_w_long], all_values, DB_CONF)
 
 
+def datacleaning_step(output_stream):
+    fn = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fix_dates.tsql')
+    load_sqltemplate(fn, {'source_table_2009': 'ifbl_2009'}, DB_CONF)
+
+
 def main(args):
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # No need to flush
     o = sys.stdout
@@ -106,6 +111,8 @@ def main(args):
         if case('florabank_load', 'ifbl_load', 'input_schema_creation', 'db_creation'):
             # 4. Import Florabank from DwC-A
             load_florabank_step(o)
+        if case('datacleaning', 'florabank_load', 'ifbl_load', 'input_schema_creation', 'db_creation'):
+            datacleaning_step(o)
     
 
 if __name__ == "__main__":

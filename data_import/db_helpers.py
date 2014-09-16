@@ -1,5 +1,9 @@
 import psycopg2
+import os
 import csv
+from tempfile import mkstemp
+
+from jinja2 import Environment, FileSystemLoader
 
 from utils import exec_shell, chunks
 
@@ -51,6 +55,24 @@ def create_database(params):
 def drop_database(params):
     cmd = "dropdb" + " " + _make_db_args_name(params)
     return exec_shell(cmd)
+
+
+# filename: full path to filename of the SQL templates
+# context: variable substitution (templating)
+def load_sqltemplate(filename, context, db_params):
+    # Render SQL template to temporary file
+    j2_env = Environment(loader=FileSystemLoader('/'), trim_blocks=True)
+    r = j2_env.get_template(filename).render(context)
+    fd, temp_path = mkstemp()
+    os.write(fd, r)
+    os.close(fd)
+
+    # Load rendered version to Postgres
+    return_of_load = load_sqlfile(temp_path, db_params)
+    # Remove temporary file
+    os.remove(temp_path)
+
+    return return_of_load
 
 
 def load_sqlfile(filename, db_params):
