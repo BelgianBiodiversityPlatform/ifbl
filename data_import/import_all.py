@@ -28,6 +28,8 @@ IFBL_2010_TABLE = 'ifbl_2010'
 IFBL_2013_TABLE = 'ifbl_2013'
 ALL_IFBL_TABLES = [IFBL_2009_TABLE, IFBL_2010_TABLE, IFBL_2013_TABLE]
 
+WORK_SCHEMA_NAME = 'nbgb_ifbl'
+
 # Source files to import
 DATA_SOURCES = [{'fn': './ifbl_csv_source/IFBL2009.csv', 'delimiter': ',', 'table': IFBL_2009_TABLE},
                 {'fn': './ifbl_csv_source/IFBL2010.csv', 'delimiter': ',', 'table': IFBL_2010_TABLE},
@@ -35,7 +37,7 @@ DATA_SOURCES = [{'fn': './ifbl_csv_source/IFBL2009.csv', 'delimiter': ',', 'tabl
 
 FLORABANK_DWCA = '/Users/nicolasnoe/Downloads/dwca-florabank1-occurrences.zip'
 
-START_AT = 'db_creation'
+START_AT = 'copy_input_to_work'
 
 
 def sqltemplate_absolute_path(filename):
@@ -102,7 +104,19 @@ def datacleaning_step(output_stream):
                'source_table_2013': IFBL_2013_TABLE,
                'all_ifbl_tables': ALL_IFBL_TABLES}
 
-    load_sqltemplate(sqltemplate_absolute_path('input_cleaning.tsql'), context, True, DB_CONF)
+    load_sqltemplate(sqltemplate_absolute_path('input_cleaning.tsql'), context, False, DB_CONF)
+
+
+def create_work_schema_step(output_stream):
+    context = {'work_schema': WORK_SCHEMA_NAME}
+
+    return load_sqltemplate(sqltemplate_absolute_path('work_schema.tsql'), context, False, DB_CONF)
+
+
+def copy_input_to_work_step(output_stream):
+    context = {'work_schema': WORK_SCHEMA_NAME}
+    
+    return load_sqltemplate(sqltemplate_absolute_path('data_copy.tsql'), context, False, DB_CONF)
 
 
 def main(args):
@@ -111,11 +125,14 @@ def main(args):
 
     # Swith-like construct allows to jump directly in the middle of the process if needed
     # (gaining time in development)
+    previous_steps = []
     for case in switch(START_AT):
         # 1. Database creation
-        if case('db_creation'):
+        if case('db_creation', *previous_steps):
+            previous_steps.append('db_creation')  # Ensure we'll also perform next actions
             db_creation_step(o)
-        if case('input_schema_creation', 'db_creation'):
+        if case('input_schema_creation', *previous_steps):
+            previous_steps.append('input_schema_creation')
             # 2. DB Schema for flat input
             context = {'source_table_2009': IFBL_2009_TABLE,
                        'source_table_2010': IFBL_2010_TABLE,
@@ -124,14 +141,23 @@ def main(args):
             make_action_or_exit("Creating input schema...", o, load_sqltemplate,
                                 sqltemplate_absolute_path('input_schema.tsql'),
                                 context, False, DB_CONF)
-        if case('ifbl_load', 'input_schema_creation', 'db_creation'):
+        if case('ifbl_load', *previous_steps):
+            previous_steps.append('ifbl_load')
             # 3. Copy IFBL source data from CSV
             load_ifbl_step(o)
-        if case('florabank_load', 'ifbl_load', 'input_schema_creation', 'db_creation'):
+        if case('florabank_load', *previous_steps):
+            previous_steps.append('florabank_load')
             # 4. Import Florabank from DwC-A
             load_florabank_step(o)
-        if case('datacleaning', 'florabank_load', 'ifbl_load', 'input_schema_creation', 'db_creation'):
+        if case('data_cleaning', *previous_steps):
+            previous_steps.append('data_cleaning')
             datacleaning_step(o)
+        if case('work_schema', *previous_steps):
+            previous_steps.append('work_schema')
+            make_action_or_exit("Creating working schema...", o, create_work_schema_step, o)
+        if case('copy_input_to_work', *previous_steps):
+            previous_steps.append('copy_input_to_work')
+            make_action_or_exit("Copy data from input schema to work schema...", o, copy_input_to_work_step, o)
     
 
 if __name__ == "__main__":

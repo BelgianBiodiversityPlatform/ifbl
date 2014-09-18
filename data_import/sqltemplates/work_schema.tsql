@@ -1,0 +1,74 @@
+-- Remove schema if already exists, allows to restart script at this step
+
+DROP SCHEMA IF EXISTS {{ work_schema }} CASCADE;
+create schema {{ work_schema }};
+
+create table {{ work_schema }}.sources(
+    id              serial primary key,
+    name            varchar(256),
+    institutionCode varchar(8),
+    collectionCode  varchar(8),
+    lastUpdate      date
+);
+
+create table {{ work_schema }}.people(
+    id                  serial primary key,
+    source_id           integer references {{ work_schema }}.sources,
+    family_name         varchar(256),
+    first_name          varchar(256)
+);
+
+create table {{ work_schema }}.species(
+    id                  serial primary key,
+    source_id           integer references {{ work_schema }}.sources,
+    scientific_name     varchar(256) unique, --- full scientific name
+    fr_name             varchar(256),  --- french vernacular name 
+    en_name             varchar(256), --- english vernacular name 
+    nl_name             varchar(256)  --- dutch vernacular name 
+);
+
+create table {{ work_schema }}.areas(
+    id              serial primary key,
+    source_id       integer references {{ work_schema }}.sources,
+    ifbl_code       varchar(8) unique, --- format is 'A9-99-99' (1x1km) or 'A9-99' (4x4km) or 'A9' (32x20km)
+    toponym         varchar(256),
+    latitude        float,
+    longitude       float,
+    uncertainty     integer,
+    coordinateSystem    varchar(8),
+    b_region        boolean, --- within Brussels region
+    f_region        boolean, --- within Flamish region
+    w_region        boolean  --- within Walloon region
+);
+
+create table {{ work_schema }}.models(
+    id              serial primary key,
+    source_id       integer references {{ work_schema }}.sources,
+    name            varchar(64) --- checklist model used
+);
+
+create table {{ work_schema }}.checklists(
+    id              serial primary key,
+    source_id       integer references {{ work_schema }}.sources,
+    area1_id        integer references {{ work_schema }}.areas, --- 32x20 km eg 'H6'
+    area2_id        integer references {{ work_schema }}.areas, --- 4x4 km eg 'H6-35'
+    area3_id        integer references {{ work_schema }}.areas, --- 1x1 km eg 'H6-35-14'
+    model_id        integer references {{ work_schema }}.models, --- checklist model used
+    begin_date      date, --- checklist date
+    end_date        date, --- checklist date
+    observers       varchar(512) --- list of observers for this checklist
+);
+
+create table {{ work_schema }}.observers(--- observer(s) responsible for checklist
+    source_id       integer references {{ work_schema }}.sources,
+    checklist_id    integer references {{ work_schema }}.checklists,
+    person_id       integer references {{ work_schema }}.people
+);
+
+create table {{ work_schema }}.observations(--- species presence on checklist
+    id      serial primary key,
+    source_id       integer references {{ work_schema }}.sources,
+    original_id     integer, --as given by data owner
+    checklist_id    integer references {{ work_schema }}.checklists,
+    species_id      integer references {{ work_schema }}.species
+);

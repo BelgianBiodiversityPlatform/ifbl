@@ -1,0 +1,2 @@
+TRUNCATE TABLE {{ work_schema }}.sources RESTART IDENTITY CASCADE;
+INSERT INTO {{ work_schema }}.sources (name) VALUES ('IFBL digit2009'), ('IFBL digit2010'), ('IFBL digit2013'), ('INBO Florabank');

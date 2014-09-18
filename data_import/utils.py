@@ -13,6 +13,7 @@ def make_action_or_exit(action_description, output_stream, func, *func_args, **f
     output_stream.write(acolors.BOLD + action_description + acolors.ENDC)
     if not func(*func_args, **func_kwargs):
         output_stream.write(acolors.FAIL + "ERROR" + acolors.ENDC)
+        output_stream.write("\n")
         sys.exit()
     output_stream.write(acolors.OKGREEN + "DONE" + acolors.ENDC)
     output_stream.write("\n")
