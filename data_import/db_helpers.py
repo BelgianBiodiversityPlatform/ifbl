@@ -57,6 +57,10 @@ def drop_database(params):
     return exec_shell(cmd)
 
 
+# TODO: better debug... Ideally hide everything (notice, ...) but errors, with configurable way to
+# show more debuging information when needed.
+# Function should also if possible return False if errors where encountered
+
 # filename: full path to filename of the SQL templates
 # context: variable substitution (templating)
 # if debug=True, display executed queries

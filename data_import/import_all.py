@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# TODO: Make sure every failed step return False so next step are not executed
+# TODO: Make sure each step is repeatable without error (TRUNCATE before INSERT, ...)
+
 import sys
 import os
 import re
@@ -15,7 +18,7 @@ from dwca.darwincore.utils import qualname as qn
 from db_helpers import (check_db_existence, drop_database, create_database,
                         copy_csvfile_to_table, load_sqltemplate, insert_many)
 
-from utils import make_action_or_exit, switch
+from utils import make_action_or_exit, switch, acolors
 
 # Credentials should allow creation/deletion of databases
 DB_CONF = {'name': 'ifbl',
@@ -26,18 +29,33 @@ DB_CONF = {'name': 'ifbl',
 IFBL_2009_TABLE = 'ifbl_2009'
 IFBL_2010_TABLE = 'ifbl_2010'
 IFBL_2013_TABLE = 'ifbl_2013'
-ALL_IFBL_TABLES = [IFBL_2009_TABLE, IFBL_2010_TABLE, IFBL_2013_TABLE]
 
 WORK_SCHEMA_NAME = 'nbgb_ifbl'
 
 # Source files to import
-DATA_SOURCES = [{'fn': './ifbl_csv_source/IFBL2009.csv', 'delimiter': ',', 'table': IFBL_2009_TABLE},
-                {'fn': './ifbl_csv_source/IFBL2010.csv', 'delimiter': ',', 'table': IFBL_2010_TABLE},
-                {'fn': './ifbl_csv_source/IFBL2013.csv', 'delimiter': ';', 'table': IFBL_2013_TABLE}]
+IFBL_DATA_SOURCES = [{'id': 1,
+                      'label': 'IFBL digit2009',
+                      'fn': './ifbl_csv_source/IFBL2009.csv',
+                      'delimiter': ',',
+                      'table': IFBL_2009_TABLE},
 
-FLORABANK_DWCA = '/Users/nicolasnoe/Downloads/dwca-florabank1-occurrences.zip'
+                     {'id': 2,
+                      'label': 'IFBL digit2010',
+                      'fn': './ifbl_csv_source/IFBL2010.csv',
+                      'delimiter': ',',
+                      'table': IFBL_2010_TABLE},
 
-START_AT = 'copy_input_to_work'
+                     {'id': 3,
+                      'label': 'IFBL digit2013',
+                      'fn': './ifbl_csv_source/IFBL2013.csv',
+                      'delimiter': ';',
+                      'table': IFBL_2013_TABLE}]
+
+ALL_IFBL_TABLES = [t['table'] for t in IFBL_DATA_SOURCES]
+
+FLORABANK_DATA_SOURCE = '/Users/nicolasnoe/Downloads/dwca-florabank1-occurrences.zip'
+
+START_AT = 'work_schema'
 
 
 def sqltemplate_absolute_path(filename):
@@ -57,8 +75,8 @@ def db_creation_step(output_stream):
 
 
 def load_ifbl_step(output_stream):
-    for source in DATA_SOURCES:
-        output_stream.write("Importing {fn}...".format(fn=source['fn']))
+    for source in IFBL_DATA_SOURCES:
+        output_stream.write(acolors.BOLD + "Importing {fn}...".format(fn=source['fn']) + acolors.ENDC)
         f = open(os.path.join(os.path.dirname(__file__), source['fn']), 'rb')
         copy_csvfile_to_table(f, source['table'], source['delimiter'], output_stream, DB_CONF)
         output_stream.write("\n")
@@ -80,7 +98,7 @@ def load_florabank_step(output_stream):
 
     fields_w_long = [(f, qn(f)) for f in fields]
 
-    with DwCAReader(FLORABANK_DWCA) as dwca:
+    with DwCAReader(FLORABANK_DATA_SOURCE) as dwca:
         all_values = []
 
         for core_row in dwca:
@@ -114,9 +132,10 @@ def create_work_schema_step(output_stream):
 
 
 def copy_input_to_work_step(output_stream):
-    context = {'work_schema': WORK_SCHEMA_NAME}
-    
-    return load_sqltemplate(sqltemplate_absolute_path('data_copy.tsql'), context, False, DB_CONF)
+    context = {'work_schema': WORK_SCHEMA_NAME,
+               'ifbl_data_sources': IFBL_DATA_SOURCES}
+
+    return load_sqltemplate(sqltemplate_absolute_path('data_copy.tsql'), context, True, DB_CONF)
 
 
 def main(args):

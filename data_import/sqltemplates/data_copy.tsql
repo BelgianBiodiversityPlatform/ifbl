@@ -1,2 +1,38 @@
+-- 1. sources ans people are only filled with data from IFBL and are tables w/o FK
 TRUNCATE TABLE {{ work_schema }}.sources RESTART IDENTITY CASCADE;
-INSERT INTO {{ work_schema }}.sources (name) VALUES ('IFBL digit2009'), ('IFBL digit2010'), ('IFBL digit2013'), ('INBO Florabank');
+TRUNCATE TABLE {{ work_schema }}.people RESTART IDENTITY CASCADE;
+
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.sources (id, name) VALUES ({{ ds.id }}, '{{ ds.label }}');
+
+    -- NOTE: If people appear in multiple sources, only the first one will be recorded
+    INSERT INTO {{ work_schema }}.people (source_id, family_name, first_name)(
+        select distinct on ("Achternaam","Voornaam") {{ ds.id }},"Achternaam","Voornaam" from {{ ds.table }} i where "Achternaam" is not null 
+        and "Achternaam"||"Voornaam" not in (select family_name || first_name from {{ work_schema }}.people)
+        order by "Achternaam","Voornaam"
+    );
+{% endfor %}
+
+
+
+
+-- 2. species came from IFBL + Florabank and have no FK
+TRUNCATE TABLE {{ work_schema }}.species RESTART IDENTITY CASCADE;
+
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.species (source_id, scientific_name, nl_name) (
+        select distinct on ("NaamWetenschappelijk","NaamNederlands") {{ ds.id }}, "NaamWetenschappelijk","NaamNederlands" from {{ ds.table }} i 
+        where "NaamWetenschappelijk" is not null 
+        and "NaamWetenschappelijk" not in (select scientific_name from {{ work_schema }}.species)
+        order by "NaamWetenschappelijk"
+    );
+{% endfor %}
+
+
+
+
+-- INSERT INTO nbgb_ifbl.species (source_id,scientific_name)
+-- (
+--     select distinct on (originalNameUsage) 3, originalNameUsage from inbo_dwca 
+--     where originalNameUsage not in (select scientific_name from nbgb_ifbl.species) order by originalNameUsage
+-- ); 
