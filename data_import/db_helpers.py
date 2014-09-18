@@ -59,7 +59,8 @@ def drop_database(params):
 
 # filename: full path to filename of the SQL templates
 # context: variable substitution (templating)
-def load_sqltemplate(filename, context, db_params):
+# if debug=True, display executed queries
+def load_sqltemplate(filename, context, debug, db_params):
     # Render SQL template to temporary file
     j2_env = Environment(loader=FileSystemLoader('/'), trim_blocks=True)
     r = j2_env.get_template(filename).render(context)
@@ -68,19 +69,25 @@ def load_sqltemplate(filename, context, db_params):
     os.close(fd)
 
     # Load rendered version to Postgres
-    return_of_load = load_sqlfile(temp_path, db_params)
+    return_of_load = load_sqlfile(temp_path, debug, db_params)
     # Remove temporary file
     os.remove(temp_path)
 
     return return_of_load
 
 
-def load_sqlfile(filename, db_params):
-    cmd = "psql {host_user} -d {db} -f {filename}".format(
+# if debug=True, display executed queries
+def load_sqlfile(filename, debug, db_params):
+    additional_params = ""
+    if debug:
+        additional_params += "-a "
+
+    cmd = "psql {host_user} -d {db} -f {filename} {additional_params}".format(
         host_user=_make_db_args(db_params),
         db=db_params['name'],
-        filename=filename)
-    
+        filename=filename,
+        additional_params=additional_params)
+        
     return exec_shell(cmd)
 
 

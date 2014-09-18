@@ -1,6 +1,6 @@
 -- Create tables for the first stage (raw import)
 
-CREATE TABLE ifbl_2009 ( 
+CREATE TABLE {{ source_table_2009 }} ( 
     "IFBL" text,                    --- 1km square IFBL code
     "NaamWetenschappelijk" text,    --- species name
     "NaamNederlands" text,          --- vernacular name
@@ -12,7 +12,7 @@ CREATE TABLE ifbl_2009 (
     "Voornaam" text                 --- observer firstname
 ) with OIDS;
 
-CREATE TABLE ifbl_2010 ( 
+CREATE TABLE {{ source_table_2010 }} ( 
     "IFBL" text,                    --- 1km square IFBL code
     "NaamWetenschappelijk" text,    --- species name
     "NaamNederlands" text,          --- vernacular name
@@ -25,7 +25,7 @@ CREATE TABLE ifbl_2010 (
 ) with OIDS;
 
 
-CREATE TABLE ifbl_2013 (
+CREATE TABLE {{ source_table_2013 }} (
     "IFBL" text,                    --- 1km square IFBL code
     "NaamWetenschappelijk" text,    --- species name
     "NaamNederlands" text,          --- vernacular name
@@ -50,4 +50,12 @@ CREATE TABLE inbo_dwca ( --- Florabank
     "catalogNumber" text,
 
     primary key ("catalogNumber")
+);
+
+
+-- Various/helpers
+CREATE AGGREGATE array_accum (
+ SFUNC = array_append,
+ BASETYPE = anyelement,
+ STYPE = anyarray,INITCOND = '{}'
 );

@@ -10,11 +10,11 @@ def exec_shell(cmd):
 
 def make_action_or_exit(action_description, output_stream, func, *func_args, **func_kwargs):
     """ Print action_description, call func (with args) and exit if it evaluates to False."""
-    output_stream.write(action_description)
+    output_stream.write(acolors.BOLD + action_description + acolors.ENDC)
     if not func(*func_args, **func_kwargs):
-        output_stream.write("ERROR")
+        output_stream.write(acolors.FAIL + "ERROR" + acolors.ENDC)
         sys.exit()
-    output_stream.write("DONE")
+    output_stream.write(acolors.OKGREEN + "DONE" + acolors.ENDC)
     output_stream.write("\n")
 
 
@@ -54,3 +54,15 @@ class switch(object):
         else:
             return False
 
+
+# ANSI color class
+# Usage: print bcolors.WARNING + "This is a warning message" + bcolors.ENDC
+class acolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+
+    BOLD = "\033[1m"
+    ENDC = '\033[0m'
