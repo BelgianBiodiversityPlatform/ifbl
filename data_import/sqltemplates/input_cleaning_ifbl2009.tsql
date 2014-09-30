@@ -1,0 +1,21 @@
+-- 1. IFBL 2009
+-- ============
+
+-- Typos and MM-DD order issues
+update {{ table }} set "BeginDatum" = '1953-08-09' where "BeginDatum"= '0908/1953';
+update {{ table }} set "BeginDatum" = '1955-03-22' where "BeginDatum"= '22-03-1955';
+update {{ table }} set "BeginDatum" = '1953-11-22' where "BeginDatum"= '22-11-1953';
+update {{ table }} set "EindDatum" = '1952-07-26' where "EindDatum"= '26/07/195';
+update {{ table }} set "EindDatum" = '1955-03-22' where "EindDatum"= '22-03-1955';
+update {{ table }} set "EindDatum" = '1953-11-22' where "EindDatum"= '22-11-1953';
+
+-- Separator (slash instead of dash) issues
+update {{ table }}
+set "BeginDatum"= to_date("BeginDatum",'DD/MM/YYYY')::text
+where "BeginDatum" like '__/__/____';
+
+update {{ table }}
+set "EindDatum"= to_date("EindDatum",'DD/MM/YYYY')::text
+where "EindDatum" like '__/__/____';
+
+update {{ table }} set "Voornaam"='' where "Voornaam" is null;

@@ -1,0 +1,17 @@
+-- 2. IFBL 2010
+-- ============
+update {{ table }} set "BeginDatum" = '10/09/1961' where "BeginDatum"= '10/09/191';
+update {{ table }} set "BeginDatum" = '28/04/1959' where "BeginDatum"= '28/04/199';
+update {{ table }} set "BeginDatum" = '22/08/1954' where "BeginDatum"= '2/08/1954';
+update {{ table }} set "BeginDatum" = '19/06/1949' where "BeginDatum"= '9/06/1949';
+update {{ table }} set "BeginDatum" = '1970-10-04' where "BeginDatum"= '0970-10-04';
+update {{ table }} set "EindDatum" = '10/10/195' where "EindDatum"= '10/10/1950';
+update {{ table }} set "EindDatum" = '18/07/1950' where "EindDatum"= '9/07/1950';
+
+update {{ table }}
+set "BeginDatum"= to_date("BeginDatum",'DD/MM/YYYY')::text where "BeginDatum" ~ E'\\d{1,2}/\\d{1,2}/\\d{4}';
+update {{ table }}
+
+set "EindDatum"= to_date("EindDatum",'DD/MM/YYYY')::text where "EindDatum" ~ E'\\d{1,2}/\\d{1,2}/\\d{4}';
+
+update {{ table }} set "Voornaam"='' where "Voornaam" is null;

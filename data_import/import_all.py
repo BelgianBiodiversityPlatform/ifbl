@@ -7,6 +7,7 @@
 import sys
 import os
 import re
+import datetime
 
 sys.path.append('/Users/nicolasnoe/Dropbox/BBPF/python-dwca-reader')
 
@@ -20,42 +21,50 @@ from db_helpers import (check_db_existence, drop_database, create_database,
 
 from utils import make_action_or_exit, switch, acolors
 
+START_AT_STEP = 'create_tapir_view'
+
 # Credentials should allow creation/deletion of databases
 DB_CONF = {'name': 'ifbl',
            'host': 'localhost',
            'encoding': 'UTF8',
            'username': 'nicolasnoe'}
 
-IFBL_2009_TABLE = 'ifbl_2009'
-IFBL_2010_TABLE = 'ifbl_2010'
-IFBL_2013_TABLE = 'ifbl_2013'
-
 WORK_SCHEMA_NAME = 'nbgb_ifbl'
 
 # Source files to import
-IFBL_DATA_SOURCES = [{'id': 1,
-                      'label': 'IFBL digit2009',
-                      'fn': './ifbl_csv_source/IFBL2009.csv',
-                      'delimiter': ',',
-                      'table': IFBL_2009_TABLE},
+DATA_SOURCES = [{'id': 1,
+                 'type': 'ifbl',
+                 'label': 'IFBL digit2009',
+                 'fn': './ifbl_csv_source/IFBL2009.csv',
+                 'delimiter': ',',
+                 'table': 'ifbl_2009',
+                 'cleaning_file': 'input_cleaning_ifbl2009.tsql'},
 
-                     {'id': 2,
-                      'label': 'IFBL digit2010',
-                      'fn': './ifbl_csv_source/IFBL2010.csv',
-                      'delimiter': ',',
-                      'table': IFBL_2010_TABLE},
+                {'id': 2,
+                 'type': 'ifbl',
+                 'label': 'IFBL digit2010',
+                 'fn': './ifbl_csv_source/IFBL2010.csv',
+                 'delimiter': ',',
+                 'table': 'ifbl_2010',
+                 'cleaning_file': 'input_cleaning_ifbl2010.tsql'},
 
-                     {'id': 3,
-                      'label': 'IFBL digit2013',
-                      'fn': './ifbl_csv_source/IFBL2013.csv',
-                      'delimiter': ';',
-                      'table': IFBL_2013_TABLE}]
+                {'id': 3,
+                 'type': 'ifbl',
+                 'label': 'IFBL digit2013',
+                 'fn': './ifbl_csv_source/IFBL2013.csv',
+                 'delimiter': ';',
+                 'table': 'ifbl_2013',
+                 'cleaning_file': 'input_cleaning_ifbl2013.tsql'},
 
-ALL_IFBL_TABLES = [t['table'] for t in IFBL_DATA_SOURCES]
+                {'id': 4,
+                 'type': 'florabank',
+                 'label': 'Florabank',
+                 'fn': '/Users/nicolasnoe/Downloads/dwca-florabank1-occurrences.zip',
+                 'table': 'inbo_dwca'}
+                ]
 
-FLORABANK_DATA_SOURCE = '/Users/nicolasnoe/Downloads/dwca-florabank1-occurrences.zip'
-
-START_AT = 'work_schema'
+IFBL_DATA_SOURCES = [s for s in DATA_SOURCES if s['type'] == 'ifbl']
+FLORABANK_DATA_SOURCES = [s for s in DATA_SOURCES if s['type'] == 'florabank']
 
 
 def sqltemplate_absolute_path(filename):
@@ -75,11 +84,12 @@ def db_creation_step(output_stream):
 
 
 def load_ifbl_step(output_stream):
-    for source in IFBL_DATA_SOURCES:
-        output_stream.write(acolors.BOLD + "Importing {fn}...".format(fn=source['fn']) + acolors.ENDC)
-        f = open(os.path.join(os.path.dirname(__file__), source['fn']), 'rb')
-        copy_csvfile_to_table(f, source['table'], source['delimiter'], output_stream, DB_CONF)
-        output_stream.write("\n")
+    for source in DATA_SOURCES:
+        if source['type'] == 'ifbl':
+            output_stream.write(acolors.BOLD + "Importing {fn}...".format(fn=source['fn']) + acolors.ENDC)
+            f = open(os.path.join(os.path.dirname(__file__), source['fn']), 'rb')
+            copy_csvfile_to_table(f, source['table'], source['delimiter'], output_stream, DB_CONF)
+            output_stream.write("\n")
 
 
 def load_florabank_step(output_stream):
@@ -98,31 +108,31 @@ def load_florabank_step(output_stream):
 
     fields_w_long = [(f, qn(f)) for f in fields]
 
-    with DwCAReader(FLORABANK_DATA_SOURCE) as dwca:
-        all_values = []
+    for source in DATA_SOURCES:
+        if source['type'] == 'florabank':
+            with DwCAReader(source['fn']) as dwca:
+                all_values = []
 
-        for core_row in dwca:
-            ar = core_row.data[qn('associatedReferences')]
-            # Ignore if not a "streeplijst"
-            if re.search('Streeplijst', ar, re.IGNORECASE):
-                row_values = []
-                for f in fields_w_long:
-                    row_values.append(core_row.data[f[1]])
+                for core_row in dwca:
+                    ar = core_row.data[qn('associatedReferences')]
+                    # Ignore if not a "streeplijst"
+                    if re.search('Streeplijst', ar, re.IGNORECASE):
+                        row_values = []
+                        for f in fields_w_long:
+                            row_values.append(core_row.data[f[1]])
 
-                all_values.append(row_values)
+                        all_values.append(row_values)
 
-        output_stream.write("Finished reading...")
-        insert_many('inbo_dwca', [f[0] for f in fields_w_long], all_values, DB_CONF)
-        output_stream.write("Finished inserting...")
+                output_stream.write("Finished reading...")
+                insert_many(source['table'], [f[0] for f in fields_w_long], all_values, DB_CONF)
+                output_stream.write("Finished inserting...")
 
 
 def datacleaning_step(output_stream):
-    context = {'source_table_2009': IFBL_2009_TABLE,
-               'source_table_2010': IFBL_2010_TABLE,
-               'source_table_2013': IFBL_2013_TABLE,
-               'all_ifbl_tables': ALL_IFBL_TABLES}
-
-    load_sqltemplate(sqltemplate_absolute_path('input_cleaning.tsql'), context, False, DB_CONF)
+    for source in DATA_SOURCES:
+        if source['type'] == 'ifbl':
+            output_stream.write(acolors.BOLD + "Cleaning {fn}...".format(fn=source['label']) + acolors.ENDC)
+            load_sqltemplate(sqltemplate_absolute_path(source['cleaning_file']), {'table': source['table']}, False, DB_CONF)
 
 
 def create_work_schema_step(output_stream):
@@ -133,9 +143,20 @@ def create_work_schema_step(output_stream):
 
 def copy_input_to_work_step(output_stream):
     context = {'work_schema': WORK_SCHEMA_NAME,
-               'ifbl_data_sources': IFBL_DATA_SOURCES}
+               'ifbl_data_sources': IFBL_DATA_SOURCES,
+               'all_data_sources': DATA_SOURCES,
+               'florabank_data_sources': FLORABANK_DATA_SOURCES}
 
     return load_sqltemplate(sqltemplate_absolute_path('data_copy.tsql'), context, True, DB_CONF)
+
+
+def create_view_step(output_stream):
+    # Only IFBL data is published, Florabank is already published by INBO !!
+    context = {'work_schema': WORK_SCHEMA_NAME,
+               'current_date': datetime.date.today().strftime("%Y-%m-%d"),
+               'comma_separated_ifbl_ids': ','.join(map(str, [s['id'] for s in IFBL_DATA_SOURCES]))
+               }
+    return load_sqltemplate(sqltemplate_absolute_path('create_view.tsql'), context, True, DB_CONF)
 
 
 def main(args):
@@ -145,7 +166,7 @@ def main(args):
     # Swith-like construct allows to jump directly in the middle of the process if needed
     # (gaining time in development)
     previous_steps = []
-    for case in switch(START_AT):
+    for case in switch(START_AT_STEP):
         # 1. Database creation
         if case('db_creation', *previous_steps):
             previous_steps.append('db_creation')  # Ensure we'll also perform next actions
@@ -153,9 +174,8 @@ def main(args):
         if case('input_schema_creation', *previous_steps):
             previous_steps.append('input_schema_creation')
             # 2. DB Schema for flat input
-            context = {'source_table_2009': IFBL_2009_TABLE,
-                       'source_table_2010': IFBL_2010_TABLE,
-                       'source_table_2013': IFBL_2013_TABLE}
+            context = {'ifbl_data_sources': IFBL_DATA_SOURCES,
+                       'florabank_data_sources': FLORABANK_DATA_SOURCES}
 
             make_action_or_exit("Creating input schema...", o, load_sqltemplate,
                                 sqltemplate_absolute_path('input_schema.tsql'),
@@ -177,6 +197,10 @@ def main(args):
         if case('copy_input_to_work', *previous_steps):
             previous_steps.append('copy_input_to_work')
             make_action_or_exit("Copy data from input schema to work schema...", o, copy_input_to_work_step, o)
+        if case('create_tapir_view', *previous_steps):
+            previous_steps.append('create_tapir_view')
+            make_action_or_exit("Create TAPIR view for GBIF...", o, create_view_step, o)
+
     
 
 if __name__ == "__main__":

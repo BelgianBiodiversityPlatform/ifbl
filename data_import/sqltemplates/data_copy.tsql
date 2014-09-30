@@ -2,9 +2,11 @@
 TRUNCATE TABLE {{ work_schema }}.sources RESTART IDENTITY CASCADE;
 TRUNCATE TABLE {{ work_schema }}.people RESTART IDENTITY CASCADE;
 
-{% for ds in ifbl_data_sources %}
+{% for ds in all_data_sources %}
     INSERT INTO {{ work_schema }}.sources (id, name) VALUES ({{ ds.id }}, '{{ ds.label }}');
+{% endfor %}
 
+{% for ds in ifbl_data_sources %}
     -- NOTE: If people appear in multiple sources, only the first one will be recorded
     INSERT INTO {{ work_schema }}.people (source_id, family_name, first_name)(
         select distinct on ("Achternaam","Voornaam") {{ ds.id }},"Achternaam","Voornaam" from {{ ds.table }} i where "Achternaam" is not null 
@@ -12,8 +14,6 @@ TRUNCATE TABLE {{ work_schema }}.people RESTART IDENTITY CASCADE;
         order by "Achternaam","Voornaam"
     );
 {% endfor %}
-
-
 
 
 -- 2. species came from IFBL + Florabank and have no FK
@@ -28,11 +28,141 @@ TRUNCATE TABLE {{ work_schema }}.species RESTART IDENTITY CASCADE;
     );
 {% endfor %}
 
+{% for ds in florabank_data_sources %}
+    INSERT INTO {{ work_schema }}.species (source_id,scientific_name) (
+        select distinct on ("scientificName") {{ ds.id }}, "scientificName" from {{ ds.table }} 
+        where "scientificName" not in (select scientific_name from {{ work_schema }}.species) order by "scientificName"
+    );
+{% endfor %}
+
+-- Models
+TRUNCATE TABLE {{ work_schema }}.models RESTART IDENTITY CASCADE;
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.models (source_id, name)(
+    select distinct on ("Bron") {{ ds.id }},"Bron" from {{ ds.table }} i 
+    where "Bron" is not null 
+    and "Bron" not in (select name from {{ work_schema }}.models)
+    order by "Bron"
+    );
+{% endfor %}
+
+{% for ds in florabank_data_sources %}
+    INSERT INTO {{ work_schema }}.models (source_id, name) (
+        select distinct on ("associatedReferences") {{ ds.id }},"associatedReferences" from {{ ds.table }} i 
+        where "associatedReferences" not in (select name from {{ work_schema }}.models) order by "associatedReferences"
+    );
+{% endfor %}
+
+-- Areas: we fill only the IFBL code, the rest will be retrieved later using Geowebapi
+TRUNCATE TABLE  {{ work_schema }}.areas RESTART IDENTITY CASCADE;
+
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.areas (source_id, ifbl_code, toponym)(
+    select distinct on (i."IFBL") {{ ds.id }}, i."IFBL", i."Toponiem" from {{ ds.table }} i
+    WHERE i."IFBL" not in (select ifbl_code from {{ work_schema }}.areas)
+    );
+{% endfor %}
+
+{% for ds in florabank_data_sources %}
+    INSERT INTO {{ work_schema }}.areas (source_id, ifbl_code, toponym)(
+        select distinct on ("verbatimCoordinates") {{ ds.id }}, i."verbatimCoordinates", i."verbatimLocality"
+        from inbo_dwca i 
+        where "verbatimCoordinates" not in (select ifbl_code from {{ work_schema }}.areas) order by "verbatimCoordinates"
+    );
+{% endfor %}
+
+-- Checklists
+TRUNCATE TABLE  {{ work_schema }}.checklists RESTART IDENTITY CASCADE;
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.checklists (source_id, area1_id, area2_id, area3_id,model_id, begin_date, end_date)
+    (
+    select distinct on ("IFBL","BeginDatum") {{ ds.id }}, a1.id, a2.id, a3.id, m.id, 
+    to_date("BeginDatum", 'YYYY-MM-DD'), 
+    to_date("EindDatum", 'YYYY-MM-DD') 
+    from {{ ds.table }} i 
+    left join {{ work_schema }}.models m on m.name = i."Bron"
+    left join {{ work_schema }}.areas a1 on a1.ifbl_code = substr(i."IFBL",1,2)
+    left join {{ work_schema }}.areas a2 on a2.ifbl_code = substr(i."IFBL",1,5)
+    left join {{ work_schema }}.areas a3 on a3.ifbl_code = i."IFBL"
+    order by "IFBL","BeginDatum"
+    );
+{% endfor %}
+
+{% for ds in florabank_data_sources %}
+    INSERT INTO {{ work_schema }}.checklists (source_id, area1_id, area2_id, area3_id, model_id, begin_date, end_date, observers)
+    (
+        select distinct on 
+        ("verbatimCoordinates", "eventDate") {{ ds.id }}, a1.id, a2.id, a3.id, m.id, 
+        to_date(split_part("eventDate", '/', 1), 'YYYY-MM-DD'), 
+        to_date(split_part("eventDate", '/', 2), 'YYYY-MM-DD'),
+        "recordedBy"
+        from {{ ds.table }} i 
+        left join {{ work_schema }}.models m on m.name = "associatedReferences"
+        left join {{ work_schema }}.areas a1 on a1.ifbl_code = substr("verbatimCoordinates",1,2)
+        left join {{ work_schema }}.areas a2 on a2.ifbl_code = substr("verbatimCoordinates",1,5)
+        left join {{ work_schema }}.areas a3 on a3.ifbl_code = "verbatimCoordinates" order by "verbatimCoordinates", "eventDate"
+    );
+{% endfor %}
+
+-- OBSERVERS
+TRUNCATE TABLE  {{ work_schema }}.observers RESTART IDENTITY CASCADE;
+
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.observers (source_id,checklist_id, person_id)
+    (
+        select distinct {{ ds.id }}, c.id, o.id from {{ ds.table }} i
+        left join {{ work_schema }}.people o on (o.source_id={{ ds.id }} and o.family_name=i."Achternaam" and o.first_name= i."Voornaam") 
+        left join {{ work_schema }}.areas a on (a.ifbl_code = i."IFBL")
+        left join {{ work_schema }}.checklists c on (c.source_id={{ ds.id }} and c.area3_id = a.id and c.begin_date = to_date(i."BeginDatum", 'YYYY-MM-DD'))
+        where length("IFBL")=8
+    );
+{% endfor %}
+
+
+-- OBSERVATIONS
+TRUNCATE TABLE  {{ work_schema }}.observations RESTART IDENTITY CASCADE;
+
+{% for ds in ifbl_data_sources %}
+    INSERT INTO {{ work_schema }}.observations (source_id, checklist_id, species_id)
+    (
+        select distinct {{ ds.id }}, c.id, s.id from {{ ds.table }} i
+        left join {{ work_schema }}.species s on (s.scientific_name=i."NaamWetenschappelijk") 
+        left join {{ work_schema }}.areas a on ( a.ifbl_code = i."IFBL")
+        left join {{ work_schema }}.checklists c on (c.source_id={{ ds.id }} and c.area3_id = a.id and c.begin_date = to_date(i."BeginDatum", 'YYYY-MM-DD'))
+        where length("IFBL")=8
+    );
+{% endfor %}
+
+{% for ds in florabank_data_sources %}
+    INSERT INTO {{ work_schema }}.observations (source_id, original_id, checklist_id, species_id)
+    (
+        select distinct {{ ds.id }}, "catalogNumber"::integer, c.id, s.id from {{ ds.table }} i
+        left join {{ work_schema }}.species s on (s.scientific_name="scientificName") 
+        left join {{ work_schema }}.areas a on (a.ifbl_code = "verbatimCoordinates")
+        left join {{ work_schema }}.checklists c on (c.area3_id = a.id and c.begin_date =   to_date(split_part("eventDate", '/', 1), 'YYYY-MM-DD'))
+        where length("verbatimCoordinates")=8 
+        union
+        select distinct {{ ds.id }}, "catalogNumber"::integer, c.id, s.id from {{ ds.table }} i
+        left join {{ work_schema }}.species s on (s.scientific_name="scientificName") 
+        left join {{ work_schema }}.areas a on (a.ifbl_code = "verbatimCoordinates")
+        left join {{ work_schema }}.checklists c on (c.area2_id = a.id and c.begin_date =   to_date(split_part("eventDate", '/', 1), 'YYYY-MM-DD'))
+        where length("verbatimCoordinates")=5 
+    );
+{% endfor %}
+
+{% for ds in ifbl_data_sources %}
+    Update {{ work_schema }}.checklists set observers= tmp.observers from (
+    select checklist_id,
+    array_to_string (array_accum((person.family_name || ' ' || person.first_name)::varchar::text), ', ') as observers
+    from {{ work_schema }}.observers observer 
+    join {{ work_schema }}.people person on person.id = observer.person_id
+    where observer.source_id={{ ds.id }}
+    group by observer.checklist_id
+    ) as tmp where id= tmp.checklist_id;
+{% endfor %}
 
 
 
--- INSERT INTO nbgb_ifbl.species (source_id,scientific_name)
--- (
---     select distinct on (originalNameUsage) 3, originalNameUsage from inbo_dwca 
---     where originalNameUsage not in (select scientific_name from nbgb_ifbl.species) order by originalNameUsage
--- ); 
+
+
+

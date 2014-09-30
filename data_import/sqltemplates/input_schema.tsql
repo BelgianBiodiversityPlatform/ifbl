@@ -1,56 +1,36 @@
 -- Create tables for the first stage (raw import)
 
-CREATE TABLE {{ source_table_2009 }} ( 
-    "IFBL" text,                    --- 1km square IFBL code
-    "NaamWetenschappelijk" text,    --- species name
-    "NaamNederlands" text,          --- vernacular name
-    "BeginDatum" text,              --- observation date
-    "EindDatum" text,               --- observation date, (=BeginDatum)
-    "Bron" text,                    --- checklist source
-    "Toponiem" text,                --- where in Belgium
-    "Achternaam" text,              --- observer name
-    "Voornaam" text                 --- observer firstname
-) with OIDS;
-
-CREATE TABLE {{ source_table_2010 }} ( 
-    "IFBL" text,                    --- 1km square IFBL code
-    "NaamWetenschappelijk" text,    --- species name
-    "NaamNederlands" text,          --- vernacular name
-    "BeginDatum" text,              --- observation date
-    "EindDatum" text,               --- observation date, (=BeginDatum)
-    "Bron" text,                    --- checklist source
-    "Toponiem" text,                --- where in Belgium
-    "Achternaam" text,              --- observer name
-    "Voornaam" text                 --- observer firstname
-) with OIDS;
+{% for s in ifbl_data_sources %}
+    CREATE TABLE {{ s.table }} (
+        "IFBL" text,                    --- 1km square IFBL code
+        "NaamWetenschappelijk" text,    --- species name
+        "NaamNederlands" text,          --- vernacular name
+        "BeginDatum" text,              --- observation date
+        "EindDatum" text,               --- observation date, (=BeginDatum)
+        "Bron" text,                    --- checklist source
+        "Toponiem" text,                --- where in Belgium
+        "Achternaam" text,              --- observer name
+        "Voornaam" text,                --- observer firstname
+        "NationalePlantentuinNummer" text --- NBGB number / only for 2013 import
+    ) with OIDS;
+{% endfor %}
 
 
-CREATE TABLE {{ source_table_2013 }} (
-    "IFBL" text,                    --- 1km square IFBL code
-    "NaamWetenschappelijk" text,    --- species name
-    "NaamNederlands" text,          --- vernacular name
-    "BeginDatum" text,              --- observation date
-    "EindDatum" text,               --- observation date, (=BeginDatum)
-    "Bron" text,                    --- checklist source
-    "Toponiem" text,                --- where in Belgium
-    "Achternaam" text,              --- observer name
-    "Voornaam" text,                --- observer firstname
-    "NationalePlantentuinNummer" text --- NBGB number
-) with OIDS;
+{% for s in florabank_data_sources %}
+    CREATE TABLE {{ s.table }} ( --- Florabank
+        "scientificName" text,
+        "verbatimCoordinates" text,
+        "verbatimLocality" text,
+        "coordinateUncertaintyInMeters" text,
+        "verbatimCoordinateSystem" text,
+        "associatedReferences" text,
+        "eventDate" text,
+        "recordedBy" text,
+        "catalogNumber" text,
 
-CREATE TABLE inbo_dwca ( --- Florabank
-    "scientificName" text,
-    "verbatimCoordinates" text,
-    "verbatimLocality" text,
-    "coordinateUncertaintyInMeters" text,
-    "verbatimCoordinateSystem" text,
-    "associatedReferences" text,
-    "eventDate" text,
-    "recordedBy" text,
-    "catalogNumber" text,
-
-    primary key ("catalogNumber")
-);
+        primary key ("catalogNumber")
+    );
+{% endfor %}
 
 
 -- Various/helpers

@@ -1,0 +1,35 @@
+-- 3. IFBL 2013
+-- ============
+update {{ table }} set "BeginDatum" = '01/01/1970' where "BeginDatum"='01/01/190' and "EindDatum"='31/12/1970';
+update {{ table }} set "BeginDatum" = '01/01/1953' where "BeginDatum"='01/01/195' and "EindDatum"='01/01/1953';
+update {{ table }} set "BeginDatum" = '02/07/1939' where "BeginDatum"='02/071939' and "EindDatum"='03/07/1939';
+update {{ table }} set "BeginDatum" = "EindDatum" where "BeginDatum"='12/061948' and "EindDatum"='12/06/1948';
+update {{ table }} set "BeginDatum" = "EindDatum" where "BeginDatum"='20/03/191' and "EindDatum"='20/03/1951';
+update {{ table }} set "BeginDatum" = "EindDatum" where "BeginDatum"='24/061958' and "EindDatum"='24/06/1958';
+update {{ table }} set "BeginDatum" = "EindDatum" where "BeginDatum"='27021960' and "EindDatum"='27/02/1960';
+update {{ table }} set "BeginDatum" = "EindDatum" where "BeginDatum"='28/07/194' and "EindDatum"='28/07/1948';
+update {{ table }} set "BeginDatum" = "EindDatum" where "BeginDatum"='25/040/196' and "EindDatum"='25/04/1965';
+update {{ table }} set "BeginDatum" = '01/01/1970' where "BeginDatum"='01/001/197' and "EindDatum"='31/12/1970';
+update {{ table }} set "BeginDatum" = '1963-02-28' where "BeginDatum"='1963-02-29';
+update {{ table }} set "BeginDatum" = '1948-04-30' where "BeginDatum"='1948-04-31';
+update {{ table }} set "EindDatum" = "BeginDatum" where "BeginDatum"='13/06/1948' and "EindDatum"='13/06/948';
+update {{ table }} set "EindDatum" = "BeginDatum" where "BeginDatum"='18/06/1955' and "EindDatum"='18/06/195';
+update {{ table }} set "EindDatum" = "BeginDatum" where "BeginDatum"='20/10/1948' and "EindDatum"='20/101948';
+update {{ table }} set "EindDatum" = '31/07/1946' where "BeginDatum"='01/07/1946' and "EindDatum"='31/071946';
+update {{ table }} set "EindDatum" = "BeginDatum" where "EindDatum"='05/071/953';
+update {{ table }} set "EindDatum" = "BeginDatum" where "EindDatum"='15/001/196';
+update {{ table }} set "EindDatum" = "BeginDatum" where "EindDatum"='31/007/196';
+update {{ table }} set "EindDatum" = '1962-09-30' where "EindDatum"='1962-09-31';
+update {{ table }} set "EindDatum" = '1963-02-28' where "EindDatum"='1963-02-29';
+update {{ table }} set "EindDatum" = '1938-06-30' where "EindDatum"='1938-06-31';
+update {{ table }} set "EindDatum" = '1954-06-30' where "EindDatum"='1954-06-31';
+update {{ table }} set "EindDatum" = '1963-06-30' where "EindDatum"='1963-06-31';
+update {{ table }} set "EindDatum" = '1957-06-30' where "EindDatum"='1957-06-31';
+update {{ table }} set "EindDatum" = '1959-06-30' where "EindDatum"='1959-06-31';
+update {{ table }} set "EindDatum" = '1948-04-30' where "EindDatum"='1948-04-31';
+update {{ table }} set "EindDatum" = '1962-04-30' where "EindDatum"='1962-04-31';
+
+update {{ table }} set "BeginDatum" =split_part("BeginDatum", '/', 3) || '-' || split_part("BeginDatum", '/', 2) || '-' || split_part("BeginDatum", '/', 1) where "BeginDatum"  ~ E'\\d{2}/\\d{2}/\\d{4}';
+update {{ table }} set "EindDatum" =split_part("EindDatum", '/', 3) || '-' || split_part("EindDatum", '/', 2) || '-' || split_part("EindDatum", '/', 1) where "EindDatum"  ~ E'\\d{2}/\\d{2}/\\d{4}';
+
+update {{ table }} set "Voornaam"='' where "Voornaam" is null; 
