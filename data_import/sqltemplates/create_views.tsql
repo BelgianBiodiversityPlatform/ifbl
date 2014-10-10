@@ -1,4 +1,4 @@
----DROP VIEW dwC14_ifbl;
+-- Tapir View
 CREATE OR REPLACE VIEW dwC14_ifbl AS 
 -- DarwinCore 1.4 --
 SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS GlobalUniqueIdentifier,
@@ -96,3 +96,21 @@ SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS GlobalUniqueId
     
     WHERE observation.source_id in ({{ comma_separated_ifbl_ids }})
 ;
+
+
+CREATE OR REPLACE VIEW areas_with_direct_checklists AS
+      SELECT *
+      FROM {{ work_schema }}.areas
+      WHERE areas.has_direct_checklists = true
+      ORDER BY areas.uncertainty;
+
+CREATE OR REPLACE VIEW areas_4_derived_from_1 AS
+      SELECT * FROM {{ work_schema }}.areas WHERE coordinatesystem LIKE 'IFBL 4km' AND ifbl_code IN
+      (SELECT DISTINCT SUBSTRING(ifbl_code FROM 1 FOR 5) FROM {{ work_schema }}.areas WHERE coordinatesystem LIKE 'IFBL 1km');
+
+CREATE OR REPLACE VIEW squares_per_species AS (
+SELECT areas.the_geom, areas.ifbl_code, COUNT(*) AS nb_observations, observations.species_id
+FROM {{ work_schema }}.areas, {{ work_schema }}.checklists, {{ work_schema }}.observations
+WHERE checklists.area3_id = areas.id AND observations.checklist_id = checklists.id
+GROUP BY areas.ifbl_code, areas.the_geom, observations.species_id
+);

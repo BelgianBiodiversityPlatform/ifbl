@@ -37,6 +37,7 @@ TRUNCATE TABLE {{ work_schema }}.species RESTART IDENTITY CASCADE;
 
 -- Models
 TRUNCATE TABLE {{ work_schema }}.models RESTART IDENTITY CASCADE;
+
 {% for ds in ifbl_data_sources %}
     INSERT INTO {{ work_schema }}.models (source_id, name)(
     select distinct on ("Bron") {{ ds.id }},"Bron" from {{ ds.table }} i 
@@ -55,6 +56,10 @@ TRUNCATE TABLE {{ work_schema }}.models RESTART IDENTITY CASCADE;
 
 -- Areas: we fill only the IFBL code, the rest will be retrieved later using Geowebapi
 TRUNCATE TABLE  {{ work_schema }}.areas RESTART IDENTITY CASCADE;
+
+{% for code in large_areas_codes %}
+    INSERT INTO {{ work_schema }}.areas (ifbl_code) VALUES ('{{ code }}');
+{% endfor %}
 
 {% for ds in ifbl_data_sources %}
     INSERT INTO {{ work_schema }}.areas (source_id, ifbl_code, toponym)(
@@ -161,6 +166,28 @@ TRUNCATE TABLE  {{ work_schema }}.observations RESTART IDENTITY CASCADE;
     ) as tmp where id= tmp.checklist_id;
 {% endfor %}
 
+UPDATE {{ work_schema }}.areas SET has_direct_checklists=TRUE WHERE (
+    areas.id IN 
+    ((SELECT DISTINCT area1_id FROM {{ work_schema }}.checklists)
+    UNION
+    (SELECT DISTINCT area2_id FROM {{ work_schema }}.checklists)
+    UNION
+    (SELECT DISTINCT area3_id FROM {{ work_schema }}.checklists)
+    )
+);
+
+-- Some post-processing/denormalization
+DROP INDEX IF EXISTS observations_checklist_id_idx;
+CREATE INDEX observations_checklist_id_idx ON {{ work_schema }}.observations USING btree (checklist_id);
+
+INSERT INTO {{ work_schema }}.counters (id, name, value, created_at, updated_at) VALUES (1, 'checklists', (SELECT COUNT (*) FROM nbgb_ifbl.checklists), now(), now());
+INSERT INTO {{ work_schema }}.counters (id, name, value, created_at, updated_at) VALUES (2, 'observations', (SELECT COUNT (*) FROM nbgb_ifbl.observations), now(), now());
+INSERT INTO {{ work_schema }}.counters (id, name, value, created_at, updated_at) VALUES (3, 'species', (SELECT COUNT (*) FROM nbgb_ifbl.species), now(), now());
+INSERT INTO {{ work_schema }}.counters (id, name, value, created_at, updated_at) VALUES (4, 'observers', (SELECT COUNT (*) FROM nbgb_ifbl.people), now(), now());
+
+DROP INDEX IF EXISTS observations_species_id_idx;
+CREATE INDEX observations_species_id_idx ON {{ work_schema }}.observations (species_id);
+UPDATE {{ work_schema }}.species SET num_observations = (SELECT COUNT(*) FROM {{ work_schema }}.observations WHERE observations.species_id = species.id);
 
 
 

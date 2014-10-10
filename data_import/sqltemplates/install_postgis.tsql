@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS {{ postgis_schema }};
+CREATE EXTENSION IF NOT EXISTS postgis SCHEMA {{ postgis_schema }};

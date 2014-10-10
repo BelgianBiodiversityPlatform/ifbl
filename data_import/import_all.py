@@ -9,19 +9,25 @@ import os
 import re
 import datetime
 
+import urllib2
+
 sys.path.append('/Users/nicolasnoe/Dropbox/BBPF/python-dwca-reader')
 
+import psycopg2
+import psycopg2.extras
+
 from prompter import yesno
+from furl import furl
 
 from dwca.read import DwCAReader
 from dwca.darwincore.utils import qualname as qn
 
 from db_helpers import (check_db_existence, drop_database, create_database,
-                        copy_csvfile_to_table, load_sqltemplate, insert_many)
+                        copy_csvfile_to_table, load_sqltemplate, insert_many, DBConnection)
 
-from utils import make_action_or_exit, switch, acolors
+from utils import make_action_or_exit, switch, acolors, char_range
 
-START_AT_STEP = 'create_tapir_view'
+START_AT_STEP = 'db_creation'
 
 # Credentials should allow creation/deletion of databases
 DB_CONF = {'name': 'ifbl',
@@ -30,6 +36,10 @@ DB_CONF = {'name': 'ifbl',
            'username': 'nicolasnoe'}
 
 WORK_SCHEMA_NAME = 'nbgb_ifbl'
+POSTGIS_SCHEMA_NAME = 'gis'
+
+# We rely on GEOWEBAPI to get details about IFBL squares
+GEOWEBAPI_URL = "http://dev:4567/ifbl_square"
 
 # Source files to import
 DATA_SOURCES = [{'id': 1,
@@ -145,18 +155,111 @@ def copy_input_to_work_step(output_stream):
     context = {'work_schema': WORK_SCHEMA_NAME,
                'ifbl_data_sources': IFBL_DATA_SOURCES,
                'all_data_sources': DATA_SOURCES,
-               'florabank_data_sources': FLORABANK_DATA_SOURCES}
+               'florabank_data_sources': FLORABANK_DATA_SOURCES,
+               'large_areas_codes': _get_large_areas_codes()}
 
-    return load_sqltemplate(sqltemplate_absolute_path('data_copy.tsql'), context, True, DB_CONF)
+    return load_sqltemplate(sqltemplate_absolute_path('data_copy.tsql'), context, False, DB_CONF)
 
 
-def create_view_step(output_stream):
+def create_views_step(output_stream):
     # Only IFBL data is published, Florabank is already published by INBO !!
     context = {'work_schema': WORK_SCHEMA_NAME,
                'current_date': datetime.date.today().strftime("%Y-%m-%d"),
                'comma_separated_ifbl_ids': ','.join(map(str, [s['id'] for s in IFBL_DATA_SOURCES]))
                }
-    return load_sqltemplate(sqltemplate_absolute_path('create_view.tsql'), context, True, DB_CONF)
+    return load_sqltemplate(sqltemplate_absolute_path('create_views.tsql'), context, False, DB_CONF)
+
+
+# Query GeoWebApi and return (polygon, t)
+# polygon: WKT string or False if unkown
+# t: IFBL 4km, IFBL 1km, ...
+def _get_square_details(ifbl_square_code):
+    stripped_code = ifbl_square_code.replace('-', '')
+
+    if len(stripped_code) == 4:
+        t = "IFBL 4km"
+    elif len(stripped_code) == 6:
+        t = "IFBL 1km"
+
+    req = furl(GEOWEBAPI_URL)
+    req.args['id'] = stripped_code
+    req.args['epsg'] = 3857
+    # Get the polygon
+    req.args['type'] = 'polygon'
+    
+    r = urllib2.urlopen(req.url).read()
+    if r == "FALSE":
+        polygon = False
+    else:
+        polygon = r
+
+    return (polygon, t)
+
+
+def load_squares_step(output_stream):
+    with DBConnection(DB_CONF) as conn:
+        read_cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        read_cur.execute("""SELECT * from {schema}.areas""".format(schema=WORK_SCHEMA_NAME))
+        write_cur = conn.cursor()
+
+        # First, add a column for the geometry
+       
+        q = "ALTER TABLE {work_schema}.areas DROP COLUMN IF EXISTS the_geom CASCADE;".format(work_schema=WORK_SCHEMA_NAME)
+        write_cur.execute(q)
+        conn.commit()
+
+        q = "ALTER TABLE {work_schema}.areas ADD COLUMN the_geom {postgis_schema}.geometry(Polygon, 3857);".format(work_schema=WORK_SCHEMA_NAME, postgis_schema=POSTGIS_SCHEMA_NAME)
+        write_cur.execute(q)
+        conn.commit()
+
+        for record in read_cur:
+            wkt, t = _get_square_details(record['ifbl_code'])
+            if wkt:
+                params = {'wkt': wkt, 'id': record['id']}
+                q = "UPDATE {schema}.areas SET the_geom = {postgis_schema}.ST_GeomFromText(%(wkt)s, 3857) WHERE id = %(id)s".format(schema=WORK_SCHEMA_NAME, postgis_schema=POSTGIS_SCHEMA_NAME)
+                write_cur.execute(q, params)
+
+            q = "UPDATE {schema}.areas SET coordinatesystem = %(t)s WHERE id = %(id)s".format(schema=WORK_SCHEMA_NAME)
+            write_cur.execute(q, {'t': t, 'id': record['id']})
+        
+        conn.commit()
+
+    return True
+
+
+def install_postgis_step(output_stream):
+    context = {'postgis_schema': POSTGIS_SCHEMA_NAME}
+    return load_sqltemplate(sqltemplate_absolute_path('install_postgis.tsql'), context, False, DB_CONF)
+
+
+def _format_ifbl_code(a, b, c):
+    return "{a}{b}-{c}".format(a=a, b=b, c=c)
+
+
+def _get_large_areas_codes():
+    # In additions to the used areas/squares that will be extracted directly from IFBL/Florabank
+    # data, we also want(for the website) all the 4x4 squares, even if there will be no data there
+    
+    codes = []
+    for c in char_range('a', 'm'):
+        for d in range(0, 10):
+            for e in range(11, 19):
+                code = _format_ifbl_code(c, d, e)
+                codes.append(code)
+            for e in range(21, 29):
+                code = _format_ifbl_code(c, d, e)
+                codes.append(code)
+            for e in range(31, 39):
+                code = _format_ifbl_code(c, d, e)
+                codes.append(code)
+            for e in range(41, 49):
+                code = _format_ifbl_code(c, d, e)
+                codes.append(code)
+            for e in range(51, 59):
+                code = _format_ifbl_code(c, d, e)
+                codes.append(code)
+
+    return codes
 
 
 def main(args):
@@ -197,11 +300,15 @@ def main(args):
         if case('copy_input_to_work', *previous_steps):
             previous_steps.append('copy_input_to_work')
             make_action_or_exit("Copy data from input schema to work schema...", o, copy_input_to_work_step, o)
-        if case('create_tapir_view', *previous_steps):
-            previous_steps.append('create_tapir_view')
-            make_action_or_exit("Create TAPIR view for GBIF...", o, create_view_step, o)
-
-    
+        if case('install_postgis', *previous_steps):
+            previous_steps.append('install_postgis')
+            make_action_or_exit("Install PostGIS into database...", o, install_postgis_step, o)
+        if case('load_square_details', *previous_steps):
+            previous_steps.append('load_square_details')
+            make_action_or_exit("Load IFBL square details from webservice...", o, load_squares_step, o)
+        if case('create_views', *previous_steps):
+            previous_steps.append('create_views')
+            make_action_or_exit("Create various views...", o, create_views_step, o)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

@@ -1,7 +1,9 @@
 Jinja2==2.7.3
 MarkupSafe==0.23
 beautifulsoup4==4.2.1
+furl==0.3.95
 lxml==3.4.0
+orderedmultidict==0.7.3
 prompter==0.3.4
 psycopg2==2.5.2
 python-dwca-reader==0.6.0

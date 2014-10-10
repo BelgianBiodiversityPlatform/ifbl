@@ -24,21 +24,23 @@ create table {{ work_schema }}.species(
     scientific_name     varchar(256) unique, --- full scientific name
     fr_name             varchar(256),  --- french vernacular name 
     en_name             varchar(256), --- english vernacular name 
-    nl_name             varchar(256)  --- dutch vernacular name 
+    nl_name             varchar(256),  --- dutch vernacular name 
+    num_observations    integer
 );
 
 create table {{ work_schema }}.areas(
-    id              serial primary key,
-    source_id       integer references {{ work_schema }}.sources,
-    ifbl_code       varchar(8) unique, --- format is 'A9-99-99' (1x1km) or 'A9-99' (4x4km) or 'A9' (32x20km)
-    toponym         varchar(256),
-    latitude        float,
-    longitude       float,
-    uncertainty     integer,
-    coordinateSystem    varchar(8),
-    b_region        boolean, --- within Brussels region
-    f_region        boolean, --- within Flamish region
-    w_region        boolean  --- within Walloon region
+    id                      serial primary key,
+    source_id               integer references {{ work_schema }}.sources,
+    ifbl_code               varchar(8) unique, --- format is 'A9-99-99' (1x1km) or 'A9-99' (4x4km) or 'A9' (32x20km)
+    toponym                 varchar(256),
+    latitude                float,
+    longitude               float,
+    uncertainty             integer,
+    coordinateSystem        varchar(8),
+    b_region                boolean, --- within Brussels region
+    f_region                boolean, --- within Flamish region
+    w_region                boolean,  --- within Walloon region
+    has_direct_checklists   boolean
 );
 
 create table {{ work_schema }}.models(
@@ -72,3 +74,13 @@ create table {{ work_schema }}.observations(--- species presence on checklist
     checklist_id    integer references {{ work_schema }}.checklists,
     species_id      integer references {{ work_schema }}.species
 );
+
+CREATE TABLE  {{ work_schema }}.counters
+(
+  id serial NOT NULL,
+  name character varying(255),
+  value integer,
+  created_at timestamp without time zone,
+  updated_at timestamp without time zone,
+  CONSTRAINT counters_pkey PRIMARY KEY (id)
+)
