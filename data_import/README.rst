@@ -19,7 +19,7 @@ Geoserver config
 2) For the others layers ("squares_per_species_and_time" and "squares4_per_species_and_time"), we have to use the "SQL views" features of geoserver. Here is the config details:
 
 NB: Take care when configuring Geoserver : SQL Views parameters (such as range_start and range_end) sometimes are messed up by the web interface
-NB2: Sometimes geoserver fails because it tries to access some postgis table. The database should be configured so that the SEARCH PATH includes gis
+NB2: Sometimes geoserver fails because it tries to access some postgis table. The database should be configured so that the SEARCH PATH includes gis (this is done by the import script)
 
 For squares4_per_species_and_time, the config is  identic to squares_per_species_and_time, EXCEPT:
 - name of the layer (of course)
@@ -55,8 +55,8 @@ species_id      Integer
 ------------------------------------------------------------------------
 You'll also have to configure STYLING in Geoserver: 
 
-For square_per_species_and_time (2 layers)(name: ifbl_param):
--------------------------------------------------------------
+For squares_XXX layers: (name: ifbl_param):
+-------------------------------------------
 
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <StyledLayerDescriptor version="1.0.0"
@@ -130,6 +130,7 @@ Layouts:
 In geoserver data dir, we should also create a "layouts" directory containing two files:
 
 ifbl_print_w_ecoregions.xml:
+----------------------------
 
 <layout>
     <decoration type="image" affinity="bottom,left" offset="36,36">
@@ -141,7 +142,7 @@ ifbl_print_w_ecoregions.xml:
 </layout>
 
 ifbl_print:
-===========
+-----------
 
 Idem, but without the second (ecoregion) "decoration" block
 
