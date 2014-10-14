@@ -27,7 +27,7 @@ from db_helpers import (check_db_existence, drop_database, create_database,
 
 from utils import make_action_or_exit, switch, acolors, char_range
 
-START_AT_STEP = 'db_creation'
+START_AT_STEP = 'create_views'
 
 # Credentials should allow creation/deletion of databases
 DB_CONF = {'name': 'ifbl',
@@ -165,7 +165,9 @@ def create_views_step(output_stream):
     # Only IFBL data is published, Florabank is already published by INBO !!
     context = {'work_schema': WORK_SCHEMA_NAME,
                'current_date': datetime.date.today().strftime("%Y-%m-%d"),
-               'comma_separated_ifbl_ids': ','.join(map(str, [s['id'] for s in IFBL_DATA_SOURCES]))
+               'comma_separated_ifbl_ids': ','.join(map(str, [s['id'] for s in IFBL_DATA_SOURCES])),
+               'gis_schema': POSTGIS_SCHEMA_NAME,
+               'db_name': DB_CONF['name']
                }
     return load_sqltemplate(sqltemplate_absolute_path('create_views.tsql'), context, False, DB_CONF)
 

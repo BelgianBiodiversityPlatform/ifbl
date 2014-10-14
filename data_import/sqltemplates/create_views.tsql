@@ -1,3 +1,6 @@
+-- We need to alter the search path for Geoserver:
+ALTER DATABASE {{ db_name }} SET search_path = public, {{ gis_schema }};
+
 -- Tapir View
 CREATE OR REPLACE VIEW dwC14_ifbl AS 
 -- DarwinCore 1.4 --
@@ -73,8 +76,10 @@ SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS GlobalUniqueId
 ---     NULL::text AS IndividualCount, 
 
 -- Geospatial Extension --
-        to_char(area.latitude, 'S990D999')::text AS DecimalLatitude, 
-        to_char(area.longitude, 'S990D999')::text AS DecimalLongitude, 
+        {{ gis_schema }}.ST_X({{ gis_schema }}.ST_Centroid({{ gis_schema }}.ST_Transform(the_geom, 4326))) AS DecimalLongitude,  
+        {{ gis_schema }}.ST_Y({{ gis_schema }}.ST_Centroid({{ gis_schema }}.ST_Transform(the_geom, 4326))) AS DecimalLatitude,
+        --to_char(area.latitude, 'S990D999')::text AS DecimalLatitude, 
+        --to_char(area.longitude, 'S990D999')::text AS DecimalLongitude, 
         'WGS84'::text AS GeodeticDatum, 
         '750'::text AS CoordinateUncertaintyInMeters,
 ---     NULL::text AS PointRadiusSpatialFit,
