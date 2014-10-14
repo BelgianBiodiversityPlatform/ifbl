@@ -4,3 +4,5 @@
 *.pyc
 webapp/.gems
 webapp/.rbenv-gemsets
+webapp/log
+webapp/tmp
