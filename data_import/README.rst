@@ -183,15 +183,6 @@ Style: ifbl_print_background:
 </StyledLayerDescriptor>
 
 
-
-
-TODO
-====
-
-* For consistency, add optional "commit" parameter to other "writing" helpers 
-* Read Dimi's mail to see what he expects from this new import.
-* Import details about Geoserver, etc... in data_import_2012/README.txt (to move here)
-
 Summary
 =======
 
