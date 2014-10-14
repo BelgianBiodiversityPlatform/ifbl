@@ -41,7 +41,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.16)
-    pg (0.11.0)
+    pg (0.17.1)
     polyglot (0.3.2)
     rack (1.2.3)
     rack-mount (0.6.14)
@@ -79,7 +79,7 @@ PLATFORMS
 
 DEPENDENCIES
   haml
-  pg
+  pg (= 0.17.1)
   rails (= 3.0.7)
   rake (~> 0.8.7)
   sass
