@@ -11,18 +11,23 @@ On production machine (http://projects.biodiversity.be/ifbl)
 => rvm 1.9.2@ifbl (to load correct ruby&gems version)
 => unicorn_rails -E production -p 5021 --path /ifbl
 
-4. to install
-=============
+This is the Rails application powering the http://projects.biodiversity.be/ifbl
 
-- configure database.yml correctly
-- also configure Geoserver to serve the data: see in new_data_import/README.txt
-- bundle install to install dependencies
-- in application.js, configure:
+Requirements
+============
 
-IFBL.constants.wms_url 
+- tested with ruby 1.9.2
+- required gems listed in Gemfile, install with Bundler
 
-In production, we set it to: "http://projects.biodiversity.be/geoserver2/ifbl/wms". This is not the real server (it's at gis.biodiversity.be), but this is a proxy Julien 
-had to setup to avoir same-origin-policy issues.
+To install
+==========
+
+- Create the database that will be shared by the Rails app, but also by Geoserver and IPT. See doc in data_import/README.txt
+- Possibly, reconfigure/update GeoServer and IPT, see also in data_import/README.txt
+- Configure database.yml
+- Bundle install to install dependencies
+- in application.js, configure: IFBL.constants.wms_url (it may be necessary to setup a proxy server for GeoServer to avoid Same-origin policy issues)
+
 
 
 
