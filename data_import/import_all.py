@@ -27,7 +27,7 @@ from db_helpers import (check_db_existence, drop_database, create_database,
 
 from utils import make_action_or_exit, switch, acolors, char_range
 
-START_AT_STEP = 'create_views'
+START_AT_STEP = 'db_creation'
 
 # Credentials should allow creation/deletion of databases
 DB_CONF = {'name': 'ifbl',

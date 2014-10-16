@@ -13,13 +13,13 @@ development:
   encoding: unicode
   database: ifbl
   pool: 5
-  username: nnoe
-  password: jvk4QNHB
+  username: nicolasnoe
+  password: 
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
   # domain sockets, so uncomment these lines.
-  host: dev
+  host: 
   #port: 5432
 
   # Schema search path. The server defaults to $user,public
@@ -45,8 +45,8 @@ test:
 production:
   adapter: postgresql
   encoding: unicode
-  database: ifbl
+  database:
   pool: 5
-  username: ifbl
-  password: FG65kj_
-  host: db
+  username:
+  password:
+  host:

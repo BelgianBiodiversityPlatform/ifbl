@@ -192,7 +192,7 @@ This directory contains the updated (2014) import scripts and documentation for 
 Input:
 ------
     * CSV files frm the 3 IFBL Digit Calls
-    * Other floristic data from Florabank
+    * Other floristic data from Florabank (DwC-A)
     * It will need a connextion to GeoWebApi to retrieve IFBL square details.
 
 Output:
@@ -200,11 +200,4 @@ Output:
 
 One single database (raw/preparatory data in schema public, processed/webapp data in nbgb_ifbl):
     * Containing all the source data for the Rails webapp
-    * And a DwC view to be consumed by IPT (GBIF publication). !!! Florabank data should be filtered from this view so it is not published twice at GBIF!!!
-
-
-Content
-=======
-    * ifbl_csv_source: source data from IFBL Digit Calls
-    * previous_imports: previous import scripts given by andre
-    
+    * And a DwC view to be consumed by IPT (GBIF publication). !Florabank is filtered from this view so it is not published twice at GBIF!
