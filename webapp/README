@@ -1,16 +1,3 @@
-3. To Run
-=========
-
-On dev (http://home.bebif.be/ifbl) 
-
-=> $ unicorn_rails -D -p 3008 --path /ifbl
-
-On production machine (http://projects.biodiversity.be/ifbl)
-
-=> $ sudo -H -u www-ifbl bash --login (to have a correct shell environment that plays nicely with RVM)
-=> rvm 1.9.2@ifbl (to load correct ruby&gems version)
-=> unicorn_rails -E production -p 5021 --path /ifbl
-
 This is the Rails application powering the http://projects.biodiversity.be/ifbl
 
 Requirements
@@ -23,13 +10,8 @@ To install
 ==========
 
 - Create the database that will be shared by the Rails app, but also by Geoserver and IPT. See doc in data_import/README.txt
+- Do NOT run Rails migrations, they have been integrated in the Python import script
 - Possibly, reconfigure/update GeoServer and IPT, see also in data_import/README.txt
 - Configure database.yml
 - Bundle install to install dependencies
 - in application.js, configure: IFBL.constants.wms_url (it may be necessary to setup a proxy server for GeoServer to avoid Same-origin policy issues)
-
-
-
-
-
-
