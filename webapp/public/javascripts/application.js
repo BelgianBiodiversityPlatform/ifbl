@@ -4,10 +4,10 @@ var IFBL = {};
 
 IFBL.constants = {};
 IFBL.constants.center_of_belgium = new OpenLayers.LonLat(4.49, 50.55);
-IFBL.constants.wms_url = "/geoserver/ifbl/wms"; // TODO Remove this one and adapt the code to use next variable instead.
-IFBL.constants.wms_real_url = '/geoserver/wms'; 
+IFBL.constants.wms_url = "http://localhost:8080/geoserver/wms"; // TODO Remove this one and adapt the code to use next variable instead.
+IFBL.constants.wms_real_url = 'http://localhost:8080//geoserver/wms'; 
 IFBL.constants.switch_resolution = 100;
-IFBL.constants.app_prefix = '/ifbl';
+IFBL.constants.app_prefix = '/';
 
 
 IFBL.constants.mylayers = {
