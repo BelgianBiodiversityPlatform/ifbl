@@ -2,10 +2,10 @@
 ALTER DATABASE {{ db_name }} SET search_path = public, {{ gis_schema }};
 
 -- Tapir View
-CREATE OR REPLACE VIEW dwC14_ifbl AS 
+CREATE OR REPLACE VIEW dwcipt_ifbl AS 
 -- DarwinCore 1.4 --
-SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS GlobalUniqueIdentifier,
-        '{{ current_date }}'::date AS DateLastModified, 
+SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS occurrenceID,
+        '{{ current_date }}'::date AS modified, 
         'HumanObservation'::text AS BasisOfRecord, 
         'BR'::text AS InstitutionCode, 
         'IFBL'::text AS CollectionCode, 
@@ -45,10 +45,9 @@ SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS GlobalUniqueId
 -- Collecting Event Elements --
 ---     NULL::text AS CollectingMethod,
 ---     NULL::text AS ValidDistributionFlag,
-        checklist.begin_date::text as EarliestDateCollected,
-        checklist.end_date::text as LatestDateCollected,
+        (checklist.begin_date::text || '-' || checklist.end_date::text) as eventDate,
 ---     NULL::text as DayOfYear,
-        checklist.observers AS Collector, 
+        checklist.observers AS RecordedBy, 
 -- Biological Elements --
 ---     NULL::text AS Sex, 
 ---     NULL::text AS LifeStage, 
@@ -58,7 +57,6 @@ SELECT 'BR:IFBL:' || to_char(observation.id, '00000009')::text AS GlobalUniqueId
 ---     NULL::text AS RelatedInformation,
 
 -- Curatorial Extension --
-        observation.id AS CatalogNumberNumeric,
 ---     coalesce(identifier.family_name ||', '||identifier.first_name, '')::text AS IdentifiedBy, 
 ---     specimen.identified_date::text AS DateIdentified, 
 ---     specimen.collection_num::text AS CollectorNumber, 
