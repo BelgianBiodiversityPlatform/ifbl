@@ -119,7 +119,6 @@ TRUNCATE TABLE  {{ work_schema }}.observers RESTART IDENTITY CASCADE;
         left join {{ work_schema }}.people o on (o.source_id={{ ds.id }} and o.family_name=i."Achternaam" and o.first_name= i."Voornaam") 
         left join {{ work_schema }}.areas a on (a.ifbl_code = i."IFBL")
         left join {{ work_schema }}.checklists c on (c.source_id={{ ds.id }} and c.area3_id = a.id and c.begin_date = to_date(i."BeginDatum", 'YYYY-MM-DD'))
-        where length("IFBL")=8
     );
 {% endfor %}
 
@@ -134,7 +133,6 @@ TRUNCATE TABLE  {{ work_schema }}.observations RESTART IDENTITY CASCADE;
         left join {{ work_schema }}.species s on (s.scientific_name=i."NaamWetenschappelijk") 
         left join {{ work_schema }}.areas a on ( a.ifbl_code = i."IFBL")
         left join {{ work_schema }}.checklists c on (c.source_id={{ ds.id }} and c.area3_id = a.id and c.begin_date = to_date(i."BeginDatum", 'YYYY-MM-DD'))
-        where length("IFBL")=8
     );
 {% endfor %}
 
